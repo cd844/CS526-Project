@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>eCommcerce Data</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- Responsive navbar-->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">eCommerce Data</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                        <li class="nav-item"><a class="nav-link" aria-current="page" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="#">Graphs</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/predict">Project ideas</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/timeline">Timeline</a></li>
+
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Page content-->
+        <div class="container">
+            <div class="text-center mt-5">
+                <h1> Analyzation of Data</h1><br>
+                <p class="lead">Which day of the week are most items bought?</p>
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#myModal">Display Graph</button><br>
+
+                <div id="myModal" class="modal fade">
+                  <div class="modal-dialog" style="max-width: 80%;" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <!--<img src="{{ url_for('static', filename='images/dayWeek.jpg') }}" class="img-responsive">-->
+                            <center><div id='chart' class='chart'”></div></center>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+
+                <br><p class="lead">Which brand has the most sales?</p>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal2">Display Graph</button><br>
+
+                <div id="myModal2" class="modal fade">
+                    <div class="modal-dialog" style="max-width: 80%;" role="document">
+                      <div class="modal-content">
+                          <div class="modal-body">
+                            <center><div id='chart2' class='chart2'”></div></center>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+
+                <br><p class="lead">What is min and max sales of each brand?</p>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#myModal3">Display Graph</button><br>
+
+                <div id="myModal3" class="modal fade">
+                    <div class="modal-dialog" style="max-width: 80%;" role="document">
+                      <div class="modal-content">
+                          <div class="modal-body">
+                            <center><div id='chart3' class='chart3'”></div></center>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+
+                <br><p class="lead">What dates are there the most sales?</p>
+                <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#myModal4">Display Graph</button><br>
+
+                <div id="myModal4" class="modal fade">
+                    <div class="modal-dialog" style="max-width: 80%;" role="document">
+                      <div class="modal-content">
+                          <div class="modal-body">
+                            <center><div id='chart4' class='chart4'”></div></center>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+
+                <br><p class="lead">What type of activity do most customers do?</p>
+                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#myModal5">Display Graph</button><br>
+
+                <div id="myModal5" class="modal fade">
+                    <div class="modal-dialog" style="max-width: 80%;" role="document">
+                      <div class="modal-content">
+                          <div class="modal-body">
+                            <center><div id='chart5' class='chart5'”></div></center>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+
+                <br><p class="lead">What category of items are bought?</p>
+                <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#myModal6">Display Graph</button><br>
+
+                <div id="myModal6" class="modal fade">
+                    <div class="modal-dialog" style="max-width: 80%;" role="document">
+                      <div class="modal-content">
+                          <div class="modal-body">
+                              <img src="{{ url_for('static', filename='images/cat.jpg') }}" class="img-responsive">
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+
+                <br><p class="lead">What brand earns most revenue?</p>
+                <button type="button" class="btn btn-dark" data-bs-toggle="modal" data-bs-target="#myModal7">Display Graph</button><br>
+
+                <div id="myModal7" class="modal fade">
+                    <div class="modal-dialog" style="max-width: 80%;" role="document">
+                      <div class="modal-content">
+                          <div class="modal-body">
+                            <center><div id='chart6' class='chart6'”></div></center>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+
+                <br><p class="lead">What is the distribution of prices per brand?</p>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal8">Display Graph</button><br><br>
+
+                <div id="myModal8" class="modal fade">
+                    <div class="modal-dialog" style="max-width: 80%;" role="document">
+                      <div class="modal-content">
+                          <div class="modal-body">
+                            <center><div id='chart8' class='chart8'”></div></center>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+
+            </div>
+        </div>
+
+        <!-- Bootstrap core JS-->
+        <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+        <!-- Core theme JS-->
+        <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
+        <!-- Ploty JS-->
+        <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+        <script type='text/javascript'>
+          var graphs = {{graphJSON | safe}};
+          Plotly.plot('chart', graphs,{});
+          var graphs2 = {{graphJSON2 | safe}};
+          Plotly.plot('chart2', graphs2,{});
+          var graphs3 = {{graphJSON3 | safe}};
+          Plotly.plot('chart3', graphs3,{});
+          var graphs4 = {{graphJSON4 | safe}};
+          Plotly.plot('chart4', graphs4,{});
+          var graphs5 = {{graphJSON5 | safe}};
+          Plotly.plot('chart5', graphs5,{});
+          var graphs6 = {{graphJSON6 | safe}};
+          Plotly.plot('chart6', graphs6,{});
+          var graphs8 = {{graphJSON8 | safe}};
+          Plotly.plot('chart8', graphs8,{});
+        </script>
+
+    </body>
+</html>
