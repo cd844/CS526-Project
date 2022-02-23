@@ -4,19 +4,25 @@ import json
 class DatabaseInterface:
     connection_def = None
     connection_type = 'sqlite3'
+    debug = False
     def __init__(self, con, con_type = 'sqlite'):
         if(con_type not in ['sqlite']):
             raise Exception('bad db type')
         self.connection_def = con
         self.connection_type = con_type
         
-    def db_to_dataframe(self, limit = None):
+    def db_to_dataframe(self, limit = 100000, where = None):
         con = sqlite3.connect(self.connection_def)
         cur = con.cursor()
-        if limit == None:
-            rows = cur.execute("SELECT * FROM repos")
-        else:
-            rows = cur.execute("SELECT * FROM repos LIMIT (?)", (limit,))
+
+        query_s = "SELECT * FROM repos"
+        if where != None:
+            query_s += f" WHERE {where}"
+        query_s += " LIMIT (?)"
+
+        if(self.debug):
+            print(query_s)
+        rows = cur.execute(query_s, (limit,))
 
         attributes = [description[0] for description in cur.description]
         data = dict()
