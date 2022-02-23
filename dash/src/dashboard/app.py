@@ -6,11 +6,20 @@ import database as data
 import analytics as anal
 
 app = Dash(__name__)
+db_path = './data/repos2_10.db'
+db_type = 'sqlite'
+db = data.DatabaseInterface(db_path, db_type)
+db.debug = True
+df = db.db_to_dataframe(10000, 'watchers > 10')
 
 """
-Ideal callback architecture would chain GUI update -> data update -> chart update
+Basic callback architecture would chain GUI update -> data update -> plot update
+Ideal with optimizations
+GUI Update -> DB query if necessary -> data update (primarily filtering and 'mapping' procedures) -> plot view update
 """
 @app.callback(
+    Output('lang-count-bar', 'figure'),
+    Output('lang-bytes-bar', 'figure'),
     Output('scatter', 'figure'),
     Input('limit', 'value'),
     Input('where', 'value')
@@ -25,26 +34,11 @@ def update_scatter(limit, where):
         return scat
     scat = px.scatter(df, x='forks', y = 'watchers', hover_name='name',hover_data=['name'])
     scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
-    return scat
-
-
-# assume you have a "long-form" data frame
-# see https://plotly.com/python/px-arguments/ for more options
-#app.config.from_envvar('DASH_SETTINGS')
-db_path = './data/repos2_10.db'
-db_type = 'sqlite'
-db = data.DatabaseInterface(db_path, db_type)
-db.debug = True
-df = db.db_to_dataframe(10000, 'watchers > 10')
-print(df.columns)
-langs_use = anal.count_language_use(df)
-langs_bytes = anal.count_language_bytes(df)
-
-lang_count_fig = px.bar(langs_use, x="language", y="count", barmode="group")
-lang_bytes_fig = px.bar(langs_bytes, x="language", y="bytes", barmode="group")
-df['contributors'] = df['contributors'].apply(lambda x : 0 if x is None else len(x))
-scat = px.scatter(df, x='forks', y = 'watchers', hover_name='name',hover_data=['name'])
-scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
+    langs_use = anal.count_language_use(df)
+    langs_bytes = anal.count_language_bytes(df)
+    lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group")
+    lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group")
+    return lang_count_bar, lang_bytes_bar, scat 
 
 
 colors = {
@@ -65,12 +59,10 @@ app.layout = html.Div(children=[
     ]),
 
     dcc.Graph(
-        id='lang-count',
-        figure=lang_count_fig
+        id='lang-count-bar',
     ),
     
-    dcc.Graph(id = 'lang-bytes',
-        figure = lang_bytes_fig
+    dcc.Graph(id = 'lang-bytes-bar',
     ),
     dcc.Graph(id = 'scatter')
 ])
