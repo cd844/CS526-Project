@@ -10,7 +10,6 @@ db_path = './data/repos2_10.db'
 db_type = 'sqlite'
 db = data.DatabaseInterface(db_path, db_type)
 db.debug = True
-df = db.db_to_dataframe(10000, 'watchers > 10')
 
 """
 Basic callback architecture would chain GUI update -> data update -> plot update
@@ -22,16 +21,31 @@ GUI Update -> DB query if necessary -> data update (primarily filtering and 'map
     Output('lang-bytes-bar', 'figure'),
     Output('scatter', 'figure'),
     Input('limit', 'value'),
+    Input('offset', 'value'),
     Input('where', 'value')
 )
-def update_scatter(limit, where):
+def update_plots(limit, offset, where):
     #num = 0
     try:
-        num = int(limit)
-        df = db.db_to_dataframe(num, where)
+        limit_n= int(limit)
     except:
-        print(f"Cannot cast '{where}' to integer")
-        return scat
+        print(f"Cannot cast limit '{limit}' to integer")
+        return
+    try:
+        offset_n = int(offset)
+    except:
+        print(f"Cannot cast limit '{offset}' to integer")
+        return
+    try:
+        print(limit_n, offset_n, where)
+        df = db.db_to_dataframe(limit_n, offset_n, where)
+    except:
+        print("Could not make query")
+    try:
+        num = int(limit)
+    except:
+        print(f"Cannot cast '{limit}' to integer")
+
     scat = px.scatter(df, x='forks', y = 'watchers', hover_name='name',hover_data=['name'])
     scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
     langs_use = anal.count_language_use(df)
@@ -55,16 +69,24 @@ app.layout = html.Div(children=[
         "WHERE: ", dcc.Input(id = 'where', value = 'watchers > 10', type='text')
     ]),
     html.Div([
+        "OFFSET: ", dcc.Input(id = 'offset', value = '0', type='text')
+    ]),
+    html.Div([
         "LIMIT: ", dcc.Input(id = 'limit', value = '10000', type='text')
     ]),
 
-    dcc.Graph(
-        id='lang-count-bar',
-    ),
-    
-    dcc.Graph(id = 'lang-bytes-bar',
-    ),
-    dcc.Graph(id = 'scatter')
+    html.Div(children=[
+        html.Div(dcc.Graph(id='lang-count-bar')),
+        html.Div(dcc.Graph(id = 'lang-bytes-bar'))
+    ],
+    style = {
+        'display': 'flex', 'flex-direction': 'row'
+    }),
+
+    dcc.Graph(id = 'scatter',
+                style = {
+                    "height": 700
+                })
 ])
 
 if __name__ == '__main__':

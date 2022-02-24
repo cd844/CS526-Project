@@ -11,18 +11,20 @@ class DatabaseInterface:
         self.connection_def = con
         self.connection_type = con_type
         
-    def db_to_dataframe(self, limit = 100000, where = None):
+    def db_to_dataframe(self, limit = 100000, offset = 0, where = None):
         con = sqlite3.connect(self.connection_def)
         cur = con.cursor()
 
         query_s = "SELECT * FROM repos"
         if where != None:
             query_s += f" WHERE {where}"
-        query_s += " LIMIT (?)"
+        query_s += " LIMIT (?) OFFSET (?)"
 
         if(self.debug):
             print(query_s)
-        rows = cur.execute(query_s, (limit,))
+        print(type(offset), type(limit))
+        print(offset, limit)
+        rows = cur.execute(query_s, (limit, offset))
 
         attributes = [description[0] for description in cur.description]
         data = dict()
