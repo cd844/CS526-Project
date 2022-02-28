@@ -20,11 +20,26 @@ GUI Update -> DB query if necessary -> data update (primarily filtering and 'map
     Output('lang-count-bar', 'figure'),
     Output('lang-bytes-bar', 'figure'),
     Output('scatter', 'figure'),
+    Input('data_points', 'data'),
+)
+def update_plots(data_points):
+    df = pd.read_json(data_points)
+    scat = px.scatter(df, x='forks', y = 'watchers', hover_name='name',hover_data=['name'])
+    scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
+    langs_use = anal.count_language_use(df)
+    langs_bytes = anal.count_language_bytes(df)
+    lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group")
+    lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group")
+    return lang_count_bar, lang_bytes_bar, scat 
+
+
+@app.callback(
+    Output('data_points', 'data'),
     Input('limit', 'value'),
     Input('offset', 'value'),
     Input('where', 'value')
 )
-def update_plots(limit, offset, where):
+def update_data(limit, offset, where):
     #num = 0
     try:
         limit_n= int(limit)
@@ -41,26 +56,16 @@ def update_plots(limit, offset, where):
         df = db.db_to_dataframe(limit_n, offset_n, where)
     except:
         print("Could not make query")
-    try:
-        num = int(limit)
-    except:
-        print(f"Cannot cast '{limit}' to integer")
-
-    scat = px.scatter(df, x='forks', y = 'watchers', hover_name='name',hover_data=['name'])
-    scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
-    langs_use = anal.count_language_use(df)
-    langs_bytes = anal.count_language_bytes(df)
-    lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group")
-    lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group")
-    return lang_count_bar, lang_bytes_bar, scat 
-
+    return df.to_json()
 
 colors = {
     'background': '#111111',
     'text': '#7FDFBFF'
 }
 
-app.layout = html.Div(children=[
+app.layout = html.Div(
+    children=[
+    dcc.Store(id='data_points'),
     html.H1(children='AAAAAAAAAAAAAAA'),
     html.Div(children='''
        AAAAAAAAAAAAAAAAAAAAAAAAA 
@@ -86,7 +91,8 @@ app.layout = html.Div(children=[
     dcc.Graph(id = 'scatter',
                 style = {
                     "height": 700
-                })
+                }
+    )
 ])
 
 if __name__ == '__main__':
