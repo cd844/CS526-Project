@@ -12,6 +12,22 @@ class DatabaseInterface:
         self.connection_type = con_type
         
     def db_to_dataframe(self, limit = 100000, offset = 0, where = None):
+        """
+        Example Row:
+        name                                     ahoarau/ethercat-drivers
+        description     r8169 EtherCAT driver for IgH EtherCAT Master ...
+        languages                                          {'C': 1062292}
+        forks                                                          21
+        topics                                                         []
+        contributors    [{'login': 'ahoarau', 'id': 703240, 'node_id':...
+        created                                      2014-09-03T13:25:39Z
+        updated                                      2021-03-08T12:15:18Z
+        pushed                                       2014-10-30T14:41:20Z
+        size                                                          472
+        branches        [[{"name": "gh-pages", "commit": {"sha": "9ab6...
+        license         {"key": "gpl-2.0", "name": "GNU General Public...
+        watchers                                                       16
+        """
         con = sqlite3.connect(self.connection_def)
         cur = con.cursor()
 
@@ -22,8 +38,6 @@ class DatabaseInterface:
 
         if(self.debug):
             print(query_s)
-        print(type(offset), type(limit))
-        print(offset, limit)
         rows = cur.execute(query_s, (limit, offset))
 
         attributes = [description[0] for description in cur.description]

@@ -1,6 +1,8 @@
+from tkinter import N
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
+import json
 
 import database as data
 import analytics as anal
@@ -20,10 +22,16 @@ GUI Update -> DB query if necessary -> data update (primarily filtering and 'map
     Output('lang-count-bar', 'figure'),
     Output('lang-bytes-bar', 'figure'),
     Output('scatter', 'figure'),
-    Input('data_points', 'data'),
+    Input('data-all', 'data'),
 )
 def update_plots(data_points):
-    df = pd.read_json(data_points)
+    try:
+        df = pd.read_json(data_points)
+    except:
+        print("Failed to datapoints = :")
+        print(data_points)
+        return
+
     scat = px.scatter(df, x='forks', y = 'watchers', hover_name='name',hover_data=['name'])
     scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
     langs_use = anal.count_language_use(df)
@@ -34,10 +42,10 @@ def update_plots(data_points):
 
 
 @app.callback(
-    Output('data_points', 'data'),
+    Output('data-all', 'data'),
     Input('limit', 'value'),
     Input('offset', 'value'),
-    Input('where', 'value')
+    Input('where', 'value'),
 )
 def update_data(limit, offset, where):
     #num = 0
@@ -52,24 +60,55 @@ def update_data(limit, offset, where):
         print(f"Cannot cast limit '{offset}' to integer")
         return
     try:
-        print(limit_n, offset_n, where)
         df = db.db_to_dataframe(limit_n, offset_n, where)
     except:
         print("Could not make query")
+
     return df.to_json()
 
-colors = {
-    'background': '#111111',
-    'text': '#7FDFBFF'
-}
+
+"""
+Updates displayed repository info
+"""
+@app.callback(
+    Output('data-focus-info', 'children'),
+    Input('focus', 'value'),
+    Input('data-all', 'data'),
+)
+def update_focus(focus, data_all):
+    try:
+        focus_n= int(focus)
+    except:
+        print(f"Cannot cast limit '{focus}' to integer")
+        return
+    df = pd.read_json(data_all).iloc[focus_n]
+
+    # initialize markup
+    focus_markup = [html.A(html.H2(df['name']), href=f"https://www.github.com/{df['name']}")]
+    focus_markup += [df.description, html.Br()]
+    for cont in df.contributors:
+        focus_markup += [html.A(cont['login'], href = f"https://www.github.com/{cont['login']}"), html.Br()]
+
+    focus_markup += [f'topics: {df.topics}', html.Br()]
+    focus_markup += [f"watchers: {df.watchers}", html.Br()]
+    focus_markup += [f"created: {df.created}", html.Br()]
+    focus_markup += [f"updated: {df.updated}", html.Br()]
+    focus_markup += [f"pushed: {df.pushed}", html.Br()]
+    focus_markup += [f"size: {df.size}", html.Br()]
+    focus_markup += [f"branches: {df.branches}", html.Br()]
+    focus_markup += [f"languages: {df.languages}", html.Br(),]
+    focus_markup += [f"forks: {df.forks}", html.Br()]
+    focus_markup += [f"license: {df.license}", html.Br()]
+
+    return html.Div(focus_markup)
+
 
 app.layout = html.Div(
     children=[
-    dcc.Store(id='data_points'),
-    html.H1(children='AAAAAAAAAAAAAAA'),
-    html.Div(children='''
-       AAAAAAAAAAAAAAAAAAAAAAAAA 
-    '''),
+    dcc.Store(id='data-all'),
+    dcc.Store(id='data-filtered'),
+    dcc.Store(id='data-focus'),
+    html.H1(children='Data visualization and analytics'),
     html.Div([
         "WHERE: ", dcc.Input(id = 'where', value = 'watchers > 10', type='text')
     ]),
@@ -77,23 +116,30 @@ app.layout = html.Div(
         "OFFSET: ", dcc.Input(id = 'offset', value = '0', type='text')
     ]),
     html.Div([
-        "LIMIT: ", dcc.Input(id = 'limit', value = '10000', type='text')
+        "LIMIT: ", dcc.Input(id = 'limit', value = '1000', type='text')
     ]),
+    html.Div([
+        "Focus: ", dcc.Input(id = 'focus', value = '0', type='text')
+    ]),
+
+    html.Div(id = 'data-focus-info'),
 
     html.Div(children=[
         html.Div(dcc.Graph(id='lang-count-bar')),
-        html.Div(dcc.Graph(id = 'lang-bytes-bar'))
+        html.Div(dcc.Graph(id = 'lang-bytes-bar')),
     ],
     style = {
         'display': 'flex', 'flex-direction': 'row'
     }),
 
-    dcc.Graph(id = 'scatter',
-                style = {
-                    "height": 700
-                }
+    dcc.Graph(
+        id = 'scatter',
+        style = {
+            "height": 700
+        }
     )
 ])
 
 if __name__ == '__main__':
+    print("starting server")
     app.run_server(debug=True)
