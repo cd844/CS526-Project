@@ -23,8 +23,12 @@ GUI Update -> DB query if necessary -> data update (primarily filtering and 'map
     Output('lang-bytes-bar', 'figure'),
     Output('scatter', 'figure'),
     Input('data-all', 'data'),
+    Input('xaxis-col', 'value'),
+    Input('yaxis-col', 'value'),
 )
-def update_plots(data_points):
+def update_plots(data_points, xaxis_col, yaxis_col):
+    print(xaxis_col)
+    print(yaxis_col)
     try:
         df = pd.read_json(data_points)
     except:
@@ -32,7 +36,7 @@ def update_plots(data_points):
         print(data_points)
         return
 
-    scat = px.scatter(df, x='forks', y = 'watchers', hover_name='name',hover_data=['name'])
+    scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name',hover_data=['name'])
     scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
     langs_use = anal.count_language_use(df)
     langs_bytes = anal.count_language_bytes(df)
@@ -131,6 +135,22 @@ app.layout = html.Div(
     style = {
         'display': 'flex', 'flex-direction': 'row'
     }),
+
+    html.Div([
+        html.Div([
+            dcc.Dropdown(
+                ['forks', 'size', 'watchers'], 'forks',
+                id = 'xaxis-col'
+            )
+        ], style={'width': '48%', 'display': 'inline-block'}
+        ),
+        html.Div([
+            dcc.Dropdown(
+                ['forks', 'size', 'watchers'], 'watchers',
+                id = 'yaxis-col'
+            )
+        ], style = {'width':'48%', 'float': 'right', 'display': 'inline-block'})
+    ]),
 
     dcc.Graph(
         id = 'scatter',
