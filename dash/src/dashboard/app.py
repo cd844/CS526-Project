@@ -1,4 +1,3 @@
-from tkinter import N
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
