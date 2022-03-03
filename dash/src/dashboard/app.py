@@ -35,13 +35,28 @@ def update_plots(data_points, xaxis_col, yaxis_col):
         print(data_points)
         return
 
-    scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name',hover_data=['name'])
-    scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
+    scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name',hover_data=['name', 'id',], custom_data = [df.index])
+    #scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
     langs_use = anal.count_language_use(df)
     langs_bytes = anal.count_language_bytes(df)
     lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group")
     lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group")
     return lang_count_bar, lang_bytes_bar, scat 
+
+
+# this does not need to run on startup
+@app.callback(
+    Output('focus', 'value'),
+    Output('data-select-info', 'children'),
+    Input('scatter', 'clickData')
+)
+def display_selected_scatter_data(selected_data):
+    if(selected_data == None):
+        return 0, f"selected: None"
+    id = (selected_data['points'][0]['customdata'][0])
+    return id, f"selected {selected_data}"
+    
+
 
 
 @app.callback(
@@ -84,7 +99,8 @@ def update_focus(focus, data_all):
     except:
         print(f"Cannot cast limit '{focus}' to integer")
         return
-    df = pd.read_json(data_all).iloc[focus_n]
+    df_m = pd.read_json(data_all)
+    df = df_m.iloc[focus_n]
 
     # initialize markup
     focus_markup = [html.A(html.H2(df['name']), href=f"https://www.github.com/{df['name']}")]
@@ -126,6 +142,7 @@ app.layout = html.Div(
     ]),
 
     html.Div(id = 'data-focus-info'),
+    html.Div(id = 'data-select-info'),
 
     html.Div(children=[
         html.Div(dcc.Graph(id='lang-count-bar')),
