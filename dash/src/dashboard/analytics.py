@@ -59,3 +59,4 @@ def count_language_use(df):
     lang_df = pd.concat([lang_df, pd.DataFrame({'language':'other', 'count':other_count}, index=[0])], ignore_index=True)
 
     return lang_df
+
