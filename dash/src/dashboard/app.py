@@ -1,3 +1,6 @@
+from cmath import log
+from re import template
+from tkinter.ttk import Style
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
@@ -6,8 +9,11 @@ import json
 import database as data
 import analytics as anal
 
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+#app = Dash(__name__, external_stylesheets=external_stylesheets)
 app = Dash(__name__)
-db_path = './data/repos2_10.db'
+db_path = './data/repos.db'
 db_type = 'sqlite'
 db = data.DatabaseInterface(db_path, db_type)
 db.debug = True
@@ -35,12 +41,13 @@ def update_plots(data_points, xaxis_col, yaxis_col):
         print(data_points)
         return
 
-    scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name',hover_data=['name', 'id',], custom_data = [df.index])
+    scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name', size_max=60, size='size',
+    hover_data=['name', 'id',], custom_data = [df.index], template = "plotly_dark", log_x = True)
     #scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
     langs_use = anal.count_language_use(df)
     langs_bytes = anal.count_language_bytes(df)
-    lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group")
-    lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group")
+    lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group", template = "plotly_dark")
+    lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group",template = "plotly_dark")
     return lang_count_bar, lang_bytes_bar, scat 
 
 
@@ -122,59 +129,76 @@ def update_focus(focus, data_all):
     return html.Div(focus_markup)
 
 
-app.layout = html.Div(
-    children=[
-    dcc.Store(id='data-all'),
-    dcc.Store(id='data-filtered'),
-    dcc.Store(id='data-focus'),
-    html.H1(children='Data visualization and analytics'),
-    html.Div([
-        "WHERE: ", dcc.Input(id = 'where', value = 'watchers > 10', type='text')
-    ]),
-    html.Div([
-        "OFFSET: ", dcc.Input(id = 'offset', value = '0', type='text')
-    ]),
-    html.Div([
-        "LIMIT: ", dcc.Input(id = 'limit', value = '1000', type='text')
-    ]),
-    html.Div([
-        "Focus: ", dcc.Input(id = 'focus', value = '0', type='text')
-    ]),
+app.layout = html.Div(children=[
 
-    html.Div(id = 'data-focus-info'),
-    html.Div(id = 'data-select-info'),
+        dcc.Store(id='data-all'),
+        dcc.Store(id='data-filtered'),
+        dcc.Store(id='data-focus'),
 
-    html.Div(children=[
-        html.Div(dcc.Graph(id='lang-count-bar')),
-        html.Div(dcc.Graph(id = 'lang-bytes-bar')),
-    ],
-    style = {
-        'display': 'flex', 'flex-direction': 'row'
-    }),
-
-    html.Div([
         html.Div([
-            dcc.Dropdown(
-                ['forks', 'size', 'watchers'], 'forks',
-                id = 'xaxis-col'
-            )
-        ], style={'width': '48%', 'display': 'inline-block'}
-        ),
-        html.Div([
-            dcc.Dropdown(
-                ['forks', 'size', 'watchers'], 'watchers',
-                id = 'yaxis-col'
-            )
-        ], style = {'width':'48%', 'float': 'right', 'display': 'inline-block'})
-    ]),
+            html.Div([
+            html.H4('GET THE REPO STORY')
+        ], className = 'eight columns')
+        ], id = 'header', className = 'row'),
 
-    dcc.Graph(
-        id = 'scatter',
-        style = {
-            "height": 700
-        }
-    )
-])
+        html.Div([
+            html.Div([
+                dcc.Dropdown(
+                    ['forks', 'size', 'watchers'], 'forks',
+                    id = 'xaxis-col',
+                    className = 'dcc_control'
+                )
+            ]),
+            html.Div([
+                dcc.Dropdown(
+                    ['forks', 'size', 'watchers'], 'watchers',
+                    id = 'yaxis-col',
+                    className = 'dcc_control'
+                )
+            ])
+        ], className = 'pretty_container'),
+
+        html.Div(children=[
+            
+            html.Div([
+                html.Div(dcc.Graph(id='lang-count-bar')),
+                html.Div(dcc.Graph(id = 'lang-bytes-bar'))
+            ], id = 'countGraphContainer', className = "pretty_container"),
+
+            html.Div([
+                dcc.Graph(id = 'scatter')
+            ], className = 'pretty_container eight columns')      
+
+        ], className = 'row'),
+
+        html.Div([
+            html.Div([
+                html.P("Filter by:", className = 'control_label'),
+                html.Div([dcc.Input(id = 'where', value = 'watchers > 10', type='text')], className='dcc_control'),
+            ], className = 'container rightCol'),
+            html.Div([
+                html.P("Offset:", className = 'control_label'),
+                html.Div([dcc.Input(id = 'offset', value = '0', type='text')], className='dcc_control'),
+            ], className = 'container rightCol'),
+            html.Div([
+                html.P("Set a limit:", className = 'control_label'),
+                html.Div([dcc.Input(id = 'limit', value = '1000', type='text')], className = 'dcc_control'),
+            ], className='container rightCol'),
+            html.Div([
+                html.P("Set a Focus:", className = 'control_label'),
+                html.Div([dcc.Input(id = 'focus', value = '0', type='text')], className = "dcc_control")
+            ], className = 'container rightCol')  
+        ], className = 'pretty_container row'),
+
+        html.Div([
+                html.Div(id = 'data-focus-info'),
+                html.Div(id = 'data-select-info')
+                ], style = {
+                    'display': 'flex', 'flex-direction': 'column'
+                },)
+
+], style = {'height': '4%', 'background-color' : '#000000'})
+
 
 if __name__ == '__main__':
     print("starting server")
