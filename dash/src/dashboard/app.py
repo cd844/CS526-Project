@@ -62,10 +62,22 @@ def update_time_series(data_all):
         return
     langs = ['JavaScript', 'Go', 'C++', 'C', 'Python', 'Rust', 'Ruby', 'TypeScript', 'C#']
     time_data = anal.bin_languages_and_year(df['languages'], df['created'], langs)
-    print(time_data)
-
+    for lang in time_data.keys():
+        time_data[lang]['language'] = lang
+        print(time_data[lang])
     
-    return None
+    lang_bins_all = pd.concat([ time_data[k] for k in time_data.keys() ])
+    lang_bins_all = lang_bins_all.reset_index()
+    lang_bins_all['year'] = lang_bins_all['created'].dt.year
+    print(lang_bins_all)
+    max_y = lang_bins_all['count'].max() * 1.25
+
+    fig = px.scatter(lang_bins_all, x='language', y='count', title='Time Series ',color="language", animation_frame="year", size="count" ,animation_group="language",range_y=[0, max_y])
+
+
+    #fig = px.scatter(df3, x='languages', y='total', title='Time Series ',color="languages", animation_frame="year",size="total" ,animation_group="languages",range_y=[100,12000])
+    
+    return fig 
 
 
 # this does not need to run on startup

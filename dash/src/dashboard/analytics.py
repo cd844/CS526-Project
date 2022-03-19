@@ -80,5 +80,6 @@ def bin_languages_and_year(languages, time, language_bins=['JavaScript', 'Shell'
         valid_rows = df['languages'].apply( lambda langs : l in langs)
         filtered = df[valid_rows]
         filtered.set_index(time_col, inplace=True)
-        bins[l] = filtered.resample('1M').count()
+        bins[l] = filtered.resample('1Y').count()
+        bins[l] = bins[l].rename(columns = {'languages' : 'count'})
     return bins
