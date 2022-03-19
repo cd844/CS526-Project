@@ -1,4 +1,6 @@
 import pandas as pd
+import datetime as dt
+import json
 def count_language_bytes(df):
     # put langs into a dict
     language_list = dict() 
@@ -60,3 +62,23 @@ def count_language_use(df):
 
     return lang_df
 
+
+def convert_pddatetime(time):
+    time_format = '%Y-%m-%dT%H:%M:%SZ'
+    return pd.to_datetime(time, format = time_format)
+    #return dt.datetime.strptime(time_str, time_format)
+
+# Bin the occurrances of a language based on month
+def bin_languages_and_year(languages, time, language_bins=['JavaScript', 'Shell', 'C', 'C++', 'Ruby', 'Python']):
+    languages = languages.apply(lambda x : [ k for k in x.keys() ])
+    time = convert_pddatetime(time)
+    df = pd.concat([languages, time], axis=1)
+    time_col = df.columns[1]
+    #df = df.set_index(time_col)
+    bins = {}
+    for l in language_bins:
+        valid_rows = df['languages'].apply( lambda langs : l in langs)
+        filtered = df[valid_rows]
+        filtered.set_index(time_col, inplace=True)
+        bins[l] = filtered.resample('1M').count()
+    return bins

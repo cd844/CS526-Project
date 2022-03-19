@@ -13,7 +13,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 #app = Dash(__name__, external_stylesheets=external_stylesheets)
 app = Dash(__name__)
-db_path = './data/repos.db'
+db_path = './data/repos2_10.db'
 db_type = 'sqlite'
 db = data.DatabaseInterface(db_path, db_type)
 db.debug = True
@@ -32,13 +32,13 @@ GUI Update -> DB query if necessary -> data update (primarily filtering and 'map
     Input('yaxis-col', 'value'),
 )
 def update_plots(data_points, xaxis_col, yaxis_col):
-    print(xaxis_col)
-    print(yaxis_col)
+    #print(xaxis_col)
+    #print(yaxis_col)
     try:
         df = pd.read_json(data_points)
     except:
-        print("Failed to datapoints = :")
-        print(data_points)
+        print("update_plots(), failed to read datapoints:")
+        #print(data_points)
         return
 
     scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name', size_max=60, size='size',
@@ -49,6 +49,23 @@ def update_plots(data_points, xaxis_col, yaxis_col):
     lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group", template = "plotly_dark")
     lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group",template = "plotly_dark")
     return lang_count_bar, lang_bytes_bar, scat 
+
+@app.callback(
+    Output('language-timeseries', 'figure'),
+    Input('data-all', 'data')
+)
+def update_time_series(data_all):
+    try:
+        df = pd.read_json(data_all)
+    except:
+        print("update_time_series(), failed to read datapoints")
+        return
+    langs = ['JavaScript', 'Go', 'C++', 'C', 'Python', 'Rust', 'Ruby', 'TypeScript', 'C#']
+    time_data = anal.bin_languages_and_year(df['languages'], df['created'], langs)
+    print(time_data)
+
+    
+    return None
 
 
 # this does not need to run on startup
@@ -159,7 +176,6 @@ app.layout = html.Div(children=[
         ], className = 'pretty_container'),
 
         html.Div(children=[
-            
             html.Div([
                 html.Div(dcc.Graph(id='lang-count-bar')),
                 html.Div(dcc.Graph(id = 'lang-bytes-bar'))
@@ -167,6 +183,9 @@ app.layout = html.Div(children=[
 
             html.Div([
                 dcc.Graph(id = 'scatter')
+            ], className = 'pretty_container eight columns'),
+            html.Div([
+                dcc.Graph(id = 'language-timeseries')
             ], className = 'pretty_container eight columns')      
 
         ], className = 'row'),
