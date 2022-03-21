@@ -179,6 +179,10 @@
     width: calc(100% - 30px);
     position: absolute;
   }
+  #aggregateGraphContainer {
+    flex: 5;
+    position: relative;
+  }
   
   #count_graph {
     position: absolute;

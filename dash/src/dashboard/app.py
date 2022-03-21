@@ -165,9 +165,7 @@ app.layout = html.Div(children=[
         dcc.Store(id='data-focus'),
 
         html.Div([
-            html.Div([
-            html.H4('GET THE REPO STORY')
-        ], className = 'eight columns')
+            html.Div(html.H4('GET THE REPO STORY'), className = 'eight columns')
         ], id = 'header', className = 'row'),
 
         html.Div([
@@ -194,12 +192,9 @@ app.layout = html.Div(children=[
             ], id = 'countGraphContainer', className = "pretty_container"),
 
             html.Div([
-                dcc.Graph(id = 'scatter')
-            ], className = 'pretty_container eight columns'),
-            html.Div([
-                dcc.Graph(id = 'language-timeseries')
-            ], className = 'pretty_container eight columns')      
-
+                html.Div(dcc.Graph(id = 'scatter')),
+                html.Div(dcc.Graph(id = 'language-timeseries')),
+            ], id = 'aggregateGraphContainer', className = 'pretty_container eight columns'),
         ], className = 'row'),
 
         html.Div([
