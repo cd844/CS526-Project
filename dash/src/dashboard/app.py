@@ -13,7 +13,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 #app = Dash(__name__, external_stylesheets=external_stylesheets)
 app = Dash(__name__)
-db_path = './data/repos2_10.db'
+db_path = './data/new_repos.db'
 db_type = 'sqlite'
 db = data.DatabaseInterface(db_path, db_type)
 db.debug = True
@@ -32,8 +32,6 @@ GUI Update -> DB query if necessary -> data update (primarily filtering and 'map
     Input('yaxis-col', 'value'),
 )
 def update_plots(data_points, xaxis_col, yaxis_col):
-    #print(xaxis_col)
-    #print(yaxis_col)
     try:
         df = pd.read_json(data_points)
     except:
@@ -42,7 +40,7 @@ def update_plots(data_points, xaxis_col, yaxis_col):
         return
 
     scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name', size_max=60, size='size',
-    hover_data=['name', 'id',], custom_data = [df.index], template = "plotly_dark", log_x = True)
+    hover_data=['name', 'pk',], custom_data = [df.index], template = "plotly_dark", log_x = True)
     #scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
     langs_use = anal.count_language_use(df)
     langs_bytes = anal.count_language_bytes(df)
@@ -61,14 +59,14 @@ def update_time_series(data_all):
         print("update_time_series(), failed to read datapoints")
         return
     langs = ['JavaScript', 'Go', 'C++', 'C', 'Python', 'Rust', 'Ruby', 'TypeScript', 'C#']
-    time_data = anal.bin_languages_and_year(df['languages'], df['created'], langs)
+    time_data = anal.bin_languages_and_year(df['languages'], df['created_ts'], langs)
     for lang in time_data.keys():
         time_data[lang]['language'] = lang
         print(time_data[lang])
     
     lang_bins_all = pd.concat([ time_data[k] for k in time_data.keys() ])
     lang_bins_all = lang_bins_all.reset_index()
-    lang_bins_all['year'] = lang_bins_all['created'].dt.year
+    lang_bins_all['year'] = lang_bins_all['created_ts'].dt.year
     print(lang_bins_all)
     max_y = lang_bins_all['count'].max() * 1.25
 
@@ -117,6 +115,12 @@ def update_data(limit, offset, where):
         df = db.db_to_dataframe(limit_n, offset_n, where)
     except:
         print("Could not make query")
+        print(
+        f'''limit_n: {limit_n}
+        offset_n: {offset_n}
+        where: {where}'''
+        )
+        return pd.DataFrame()
 
     return df.to_json()
 
@@ -129,7 +133,7 @@ Updates displayed repository info
     Input('focus', 'value'),
     Input('data-all', 'data'),
 )
-def update_focus(focus, data_all):
+def update_focus_info(focus, data_all):
     try:
         focus_n= int(focus)
     except:
@@ -141,22 +145,22 @@ def update_focus(focus, data_all):
     # initialize markup
     focus_markup = [html.A(html.H2(df['name']), href=f"https://www.github.com/{df['name']}")]
     focus_markup += [df.description, html.Br()]
-    for cont in df.contributors:
-        focus_markup += [html.A(cont['login'], href = f"https://www.github.com/{cont['login']}"), html.Br()]
 
     focus_markup += [f'topics: {df.topics}', html.Br()]
-    focus_markup += [f"watchers: {df.watchers}", html.Br()]
-    focus_markup += [f"created: {df.created}", html.Br()]
-    focus_markup += [f"updated: {df.updated}", html.Br()]
-    focus_markup += [f"pushed: {df.pushed}", html.Br()]
+    focus_markup += [f"watchers_count: {df.watchers_count}", html.Br()]
+    focus_markup += [f"created_ts: {df.created_ts}", html.Br()]
+    focus_markup += [f"updated_ts: {df.updated_ts}", html.Br()]
+    focus_markup += [f"pushed_ts: {df.pushed_ts}", html.Br()]
     focus_markup += [f"size: {df.size}", html.Br()]
     focus_markup += [f"branches: {df.branches}", html.Br()]
     focus_markup += [f"languages: {df.languages}", html.Br(),]
-    focus_markup += [f"forks: {df.forks}", html.Br()]
+    focus_markup += [f"forks_count: {df.forks_count}", html.Br()]
     focus_markup += [f"license: {df.license}", html.Br()]
 
     return html.Div(focus_markup)
 
+
+scatter_plot_axes = ['forks_count', 'size', 'watchers_count']
 
 app.layout = html.Div(children=[
 
@@ -171,14 +175,14 @@ app.layout = html.Div(children=[
         html.Div([
             html.Div([
                 dcc.Dropdown(
-                    ['forks', 'size', 'watchers'], 'forks',
+                    scatter_plot_axes, scatter_plot_axes[0],
                     id = 'xaxis-col',
                     className = 'dcc_control'
                 )
             ]),
             html.Div([
                 dcc.Dropdown(
-                    ['forks', 'size', 'watchers'], 'watchers',
+                    scatter_plot_axes, scatter_plot_axes[1],
                     id = 'yaxis-col',
                     className = 'dcc_control'
                 )
@@ -200,7 +204,7 @@ app.layout = html.Div(children=[
         html.Div([
             html.Div([
                 html.P("Filter by:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'where', value = 'watchers > 10', type='text')], className='dcc_control'),
+                html.Div([dcc.Input(id = 'where', value = 'watchers_count > 10', type='text')], className='dcc_control'),
             ], className = 'container rightCol'),
             html.Div([
                 html.P("Offset:", className = 'control_label'),

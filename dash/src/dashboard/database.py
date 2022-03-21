@@ -45,6 +45,7 @@ class DatabaseInterface:
         data = dict()
         for a in attributes:
             data[a] = [] # preallocating would be a better optimization
+        
 
         for r in rows:
             for i, a in enumerate(attributes):
@@ -52,6 +53,20 @@ class DatabaseInterface:
 
         df = pd.DataFrame(data)
         # use this macro to convert json string to dict()
-        df['languages'] = df['languages'].apply(lambda x : json.loads(x)[0])
-        df['contributors'] = df['contributors'].apply(lambda x : json.loads(x)[0])
+        df['languages'] = df['languages'].apply(lambda x : json.loads(x))
+        #df['contributors'] = df['contributors'].apply(lambda x : json.loads(x)[0])
         return df
+
+def main():
+    print("Test db")
+    db_path = './data/new_repos.db'
+    db_type = 'sqlite'
+    db = DatabaseInterface(db_path, db_type)
+    
+    df = db.db_to_dataframe(100)
+    print(df.columns)
+    print(df)
+
+
+if __name__=='__main__':
+    main()
