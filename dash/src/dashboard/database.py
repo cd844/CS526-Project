@@ -1,5 +1,6 @@
 import sqlite3
 import datetime as dt
+import numpy as np
 import pandas as pd
 import json
 class DatabaseInterface:
@@ -52,8 +53,14 @@ class DatabaseInterface:
                 data[a].append(r[i])
 
         df = pd.DataFrame(data)
+
+        ### Data cleaning
         # use this macro to convert json string to dict()
+        df['owner'] = df['owner'].apply(lambda x : json.loads(x))
         df['languages'] = df['languages'].apply(lambda x : json.loads(x))
+        df['license'] = df['license'].apply(lambda x : json.loads(x))
+        df['topics'] = df['topics'].apply(lambda x : json.loads(x))
+        df['contributors_count'] = df['contributors_count'].apply(lambda x : 1 if np.isnan(x) else x)
         #df['contributors'] = df['contributors'].apply(lambda x : json.loads(x)[0])
         return df
 
@@ -63,9 +70,11 @@ def main():
     db_type = 'sqlite'
     db = DatabaseInterface(db_path, db_type)
     
-    df = db.db_to_dataframe(100)
+    df = db.db_to_dataframe(300000)
     print(df.columns)
-    print(df)
+    filtered = df[df['topics'].apply(lambda x : len(x) > 0)]
+    print(filtered)
+    filtered.to_csv('filtered_topics.csv')
 
 
 if __name__=='__main__':

@@ -39,7 +39,7 @@ def update_plots(data_points, xaxis_col, yaxis_col):
         #print(data_points)
         return
 
-    scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name', size_max=60, size='size',
+    scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name', size_max=60,
     hover_data=['name', 'pk',], custom_data = [df.index], template = "plotly_dark", log_x = True)
     #scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
     langs_use = anal.count_language_use(df)
@@ -52,7 +52,7 @@ def update_plots(data_points, xaxis_col, yaxis_col):
     Output('language-timeseries', 'figure'),
     Input('data-all', 'data')
 )
-def update_time_series(data_all):
+def update_language_timeseries(data_all):
     try:
         df = pd.read_json(data_all)
     except:
@@ -62,18 +62,13 @@ def update_time_series(data_all):
     time_data = anal.bin_languages_and_year(df['languages'], df['created_ts'], langs)
     for lang in time_data.keys():
         time_data[lang]['language'] = lang
-        print(time_data[lang])
     
     lang_bins_all = pd.concat([ time_data[k] for k in time_data.keys() ])
     lang_bins_all = lang_bins_all.reset_index()
     lang_bins_all['year'] = lang_bins_all['created_ts'].dt.year
-    print(lang_bins_all)
     max_y = lang_bins_all['count'].max() * 1.25
 
     fig = px.scatter(lang_bins_all, x='language', y='count', title='Time Series ',color="language", animation_frame="year", size="count" ,animation_group="language",range_y=[0, max_y])
-
-
-    #fig = px.scatter(df3, x='languages', y='total', title='Time Series ',color="languages", animation_frame="year",size="total" ,animation_group="languages",range_y=[100,12000])
     
     return fig 
 
@@ -143,24 +138,26 @@ def update_focus_info(focus, data_all):
     df = df_m.iloc[focus_n]
 
     # initialize markup
-    focus_markup = [html.A(html.H2(df['name']), href=f"https://www.github.com/{df['name']}")]
+    #focus_markup = [html.A(html.H2(df['name']), href=f"https://www.github.com/{df['full_name']}")]
+    focus_markup = [html.A(html.H2(df['name']), href=df.html_url)]
+    focus_markup += [html.A(df.owner["login"], href = df.owner['html_url']), html.Br()]
     focus_markup += [df.description, html.Br()]
-
     focus_markup += [f'topics: {df.topics}', html.Br()]
     focus_markup += [f"watchers_count: {df.watchers_count}", html.Br()]
+    focus_markup += [f"contributors_count: {df.contributors_count}", html.Br()]
     focus_markup += [f"created_ts: {df.created_ts}", html.Br()]
     focus_markup += [f"updated_ts: {df.updated_ts}", html.Br()]
     focus_markup += [f"pushed_ts: {df.pushed_ts}", html.Br()]
     focus_markup += [f"size: {df.size}", html.Br()]
-    focus_markup += [f"branches: {df.branches}", html.Br()]
+    #focus_markup += [f"branches: {df.branches}", html.Br()]
     focus_markup += [f"languages: {df.languages}", html.Br(),]
     focus_markup += [f"forks_count: {df.forks_count}", html.Br()]
-    focus_markup += [f"license: {df.license}", html.Br()]
+    focus_markup += ["license: ", html.A(df.license['name'], href = df.license['url']), html.Br()]
 
     return html.Div(focus_markup)
 
 
-scatter_plot_axes = ['forks_count', 'size', 'watchers_count']
+scatter_plot_axes = ['forks_count', 'size', 'watchers_count', 'contributors_count']
 
 app.layout = html.Div(children=[
 
