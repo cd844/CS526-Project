@@ -68,8 +68,8 @@ def convert_pddatetime(time):
     return pd.to_datetime(time, format = time_format)
     #return dt.datetime.strptime(time_str, time_format)
 
-# Bin the occurrances of a language based on month
-def bin_languages_and_year(languages, time, language_bins=['JavaScript', 'Shell', 'C', 'C++', 'Ruby', 'Python']):
+# Bin the occurrances of a language based on year
+def bin_languages_and_year(languages, time, language_bins=['JavaScript', 'Shell', 'C', 'C++', 'Ruby', 'Python'], time_resampling = '1Y'):
     languages = languages.apply(lambda x : [ k for k in x.keys() ])
     time = convert_pddatetime(time)
     df = pd.concat([languages, time], axis=1)
@@ -80,6 +80,6 @@ def bin_languages_and_year(languages, time, language_bins=['JavaScript', 'Shell'
         valid_rows = df['languages'].apply( lambda langs : l in langs)
         filtered = df[valid_rows]
         filtered.set_index(time_col, inplace=True)
-        bins[l] = filtered.resample('1Y').count()
+        bins[l] = filtered.resample(time_resampling).count()
         bins[l] = bins[l].rename(columns = {'languages' : 'count'})
     return bins

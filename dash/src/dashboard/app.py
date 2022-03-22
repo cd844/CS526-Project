@@ -1,5 +1,6 @@
 from cmath import log
 from re import template
+from tkinter import W
 from tkinter.ttk import Style
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
@@ -157,7 +158,42 @@ def update_focus_info(focus, data_all):
     return html.Div(focus_markup)
 
 
+"""
+Updates language comparisons
+"""
+@app.callback(
+    Output('language-comparison-violin-left', 'figure'),
+    Output('language-comparison-timeseries-left', 'figure'),
+    Input('language-comparison-dropdown-left', 'value'),
+    Input('data-all', 'data')
+)
+def update_language_comparison_left(language, data_all):
+    time_label = 'created_ts'
+    quan_axis = 'watchers_count'
+    df = pd.read_json(data_all)
+    df[time_label] = anal.convert_pddatetime(df[time_label])
+    bins = anal.bin_languages_and_year(df['languages'], df[time_label], [language])
+    time_points = bins[language]
+    print(time_points)
+
+    #print(type(df[time_label][0]))
+    violin_points = df[df.languages.apply(lambda x : language in x)]
+    print(violin_points)
+    #filtered = filtered.sort_values(by=time_label)
+    
+    return px.violin(violin_points, y = quan_axis, box=True, points='all'), px.line(time_points)
+
+
+
+
+'''
+============================================================
+LAYOUT STARTS HERE
+============================================================
+'''
+
 scatter_plot_axes = ['forks_count', 'size', 'watchers_count', 'contributors_count']
+languages_dropdown = ['Java', 'Python', 'C', 'C++', 'JavaScript']
 
 app.layout = html.Div(children=[
 
@@ -201,7 +237,7 @@ app.layout = html.Div(children=[
         html.Div([
             html.Div([
                 html.P("Filter by:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'where', value = 'watchers_count > 10', type='text')], className='dcc_control'),
+                html.Div([dcc.Input(id = 'where', value = 'watchers_count > 1000', type='text')], className='dcc_control'),
             ], className = 'container rightCol'),
             html.Div([
                 html.P("Offset:", className = 'control_label'),
@@ -209,7 +245,7 @@ app.layout = html.Div(children=[
             ], className = 'container rightCol'),
             html.Div([
                 html.P("Set a limit:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'limit', value = '1000', type='text')], className = 'dcc_control'),
+                html.Div([dcc.Input(id = 'limit', value = '10000', type='text')], className = 'dcc_control'),
             ], className='container rightCol'),
             html.Div([
                 html.P("Set a Focus:", className = 'control_label'),
@@ -222,7 +258,19 @@ app.layout = html.Div(children=[
                 html.Div(id = 'data-select-info')
                 ], style = {
                     'display': 'flex', 'flex-direction': 'column'
-                },)
+                },
+        ),
+        html.Div([
+            html.Div(
+                dcc.Dropdown(
+                    languages_dropdown, languages_dropdown[0],
+                    id = 'language-comparison-dropdown-left',
+                    className = 'dcc_control'
+                )
+            ),
+            html.Div(dcc.Graph(id='language-comparison-violin-left')),
+            html.Div(dcc.Graph(id='language-comparison-timeseries-left')),
+        ])
 
 ], style = {'height': '4%', 'background-color' : '#000000'})
 
