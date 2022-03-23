@@ -2,6 +2,8 @@ from cmath import log
 from re import template
 from tkinter import W
 from tkinter.ttk import Style
+from xml.etree.ElementTree import ProcessingInstruction
+import dash
 from dash import Dash, html, dcc, Input, Output
 import plotly.express as px
 import pandas as pd
@@ -9,6 +11,10 @@ import json
 
 import database as data
 import analytics as anal
+
+import pprint
+
+pp = pprint.PrettyPrinter(indent = 4)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -78,14 +84,33 @@ def update_language_timeseries(data_all):
 @app.callback(
     Output('focus', 'value'),
     Output('data-select-info', 'children'),
-    Input('scatter', 'clickData')
+    Input('scatter', 'clickData'),
+    Input('language-comparison-violin-left', 'clickData')
 )
-def display_selected_scatter_data(selected_data):
-    if(selected_data == None):
+def display_selected_scatter_data(selected_data_scatter, selected_data_violin):
+    if(len(dash.callback_context.triggered) > 1):
+        print("This might be a problem")
         return 0, f"selected: None"
-    id = (selected_data['points'][0]['customdata'][0])
-    return id, f"selected {selected_data}"
-    
+    if(len(dash.callback_context.triggered) == 0):
+        return 0, f"selected: None"
+    trigger = dash.callback_context.triggered[0]
+    pp.pprint(trigger)
+    print(len(trigger['value']['points']))
+    if(trigger['prop_id'] == 'language-comparison-violin-left.clickData'):
+        print("violin update")
+        if(len(selected_data_violin['points']) != 1): # this might be enough to filter out non-point clicks
+            return
+        p = selected_data_violin['points'][0]['customdata'][0]
+        print(p)
+        return p, f"selected {selected_data_violin}"
+    elif(trigger['prop_id'] == 'scatter.clickData'):
+        print("scatter update")
+        id = (selected_data_scatter['points'][0]['customdata'][0])
+        return id, f"selected {selected_data_scatter}"
+    else:
+        print("This is definitely a problem")
+
+        return
 
 
 
@@ -167,22 +192,54 @@ Updates language comparisons
     Input('language-comparison-dropdown-left', 'value'),
     Input('data-all', 'data')
 )
-def update_language_comparison_left(language, data_all):
-    time_label = 'created_ts'
-    quan_axis = 'watchers_count'
+def update_language_comparison_left(languages, data_all):
+    if(not isinstance(languages, list)):
+        languages = [languages]
     df = pd.read_json(data_all)
-    df[time_label] = anal.convert_pddatetime(df[time_label])
-    bins = anal.bin_languages_and_year(df['languages'], df[time_label], [language])
-    time_points = bins[language]
-    print(time_points)
-
-    #print(type(df[time_label][0]))
-    violin_points = df[df.languages.apply(lambda x : language in x)]
-    print(violin_points)
-    #filtered = filtered.sort_values(by=time_label)
     
-    return px.violin(violin_points, y = quan_axis, box=True, points='all'), px.line(time_points)
+    '''
+    timeseries code
+    '''
+    time_label = 'created_ts'
+    count_label = 'count'
+    lang_label = 'language'
+    
+    df[time_label] = anal.convert_pddatetime(df[time_label])
+    bins = anal.bin_languages_and_year(df['languages'], df[time_label], languages, time_resampling='3M')
+    time_points = pd.DataFrame(columns = [time_label, count_label, lang_label])
+    #print(time_points)
+    for b in bins:
+        bins[b][lang_label] = b
+        bins[b].index.names = [time_label]
+        bins[b] = bins[b].reset_index()
+        #print(bins[b])
+        time_points = pd.concat([time_points, bins[b]])
+    #print(time_points)
+    
+    '''
+    violin plot code
+    '''
+    print(df)
+    violin_y_label = 'watchers_count'
+    cols = df.columns.names.copy()
+    cols.append('df_index')
+    violin_points = pd.DataFrame(columns = cols)
+    
+    for lang in languages:
+        #print(type(df[time_label][0]))
+        violin_points_i = df[df.languages.apply(lambda x : lang in x)]
+        violin_points_i[lang_label] = lang
+        violin_points_i.index.names = ['df_index']
+        violin_points_i = violin_points_i.reset_index()
+        print(violin_points_i)
+        violin_points = pd.concat([violin_points, violin_points_i])
+        #filtered = filtered.sort_values(by=time_label)
+    
+    print(violin_points)
+    return px.violin(violin_points, y = violin_y_label, color = lang_label, box=True, hover_data = ['df_index', 'full_name'], points='all'), px.line(time_points, x=time_label, y = count_label, color = 'language')
+    #return , px.line(time_points, color = 'language')
 
+  
 
 
 
@@ -193,7 +250,7 @@ LAYOUT STARTS HERE
 '''
 
 scatter_plot_axes = ['forks_count', 'size', 'watchers_count', 'contributors_count']
-languages_dropdown = ['Java', 'Python', 'C', 'C++', 'JavaScript']
+languages_dropdown = ['Java', 'Python', 'C', 'C++', 'JavaScript', 'PHP', 'Go', "TypeScript", 'CSS', 'React', 'Kotlin', 'Rust']
 
 app.layout = html.Div(children=[
 
@@ -245,7 +302,7 @@ app.layout = html.Div(children=[
             ], className = 'container rightCol'),
             html.Div([
                 html.P("Set a limit:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'limit', value = '10000', type='text')], className = 'dcc_control'),
+                html.Div([dcc.Input(id = 'limit', value = '100000', type='text')], className = 'dcc_control'),
             ], className='container rightCol'),
             html.Div([
                 html.P("Set a Focus:", className = 'control_label'),
@@ -263,14 +320,15 @@ app.layout = html.Div(children=[
         html.Div([
             html.Div(
                 dcc.Dropdown(
-                    languages_dropdown, languages_dropdown[0],
+                    languages_dropdown, languages_dropdown[0:2], multi=True,
                     id = 'language-comparison-dropdown-left',
                     className = 'dcc_control'
                 )
             ),
             html.Div(dcc.Graph(id='language-comparison-violin-left')),
             html.Div(dcc.Graph(id='language-comparison-timeseries-left')),
-        ])
+        ]),
+        html.Div(id='test')
 
 ], style = {'height': '4%', 'background-color' : '#000000'})
 
