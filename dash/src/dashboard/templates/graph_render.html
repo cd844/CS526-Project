@@ -1,0 +1,34 @@
+<head>
+    <style> body { margin: 0; } </style>
+
+    <script src="http://unpkg.com/3d-force-graph"></script>
+    <!--<script src="../../dist/3d-force-graph.js"></script>-->
+    <script> 
+    var dict = {
+      "nodes" :
+      {{ nodes|safe }},
+      "links": 
+      {{ edges|safe }}
+    }
+    </script>
+  </head>
+
+  <body>
+    <div id="3d-graph"></div>
+
+    <script>
+
+
+
+      const gData = {
+
+          nodes:dict["nodes"],
+          links:dict["links"],
+
+      };
+
+      const Graph = ForceGraph3D({controlType: 'orbit'})
+        (document.getElementById('3d-graph'))
+          .graphData(gData).nodeLabel(node =>`${node.id}:${node.count}`).nodeAutoColorBy('id');
+    </script>
+  </body>
