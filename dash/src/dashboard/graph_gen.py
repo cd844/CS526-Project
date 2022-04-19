@@ -16,11 +16,10 @@ def read_topics(df, string):
 
 
 def get_combinations(df, visited):
-    combination = list(combinations(visited, 2))
+    #combination = list(combinations(visited, 2))
     dictionary_nodes = defaultdict()
 
 
-    print(df)
     # getting pairs for all the combinations of topics
     for i in df:
         c_list = list(combinations(i, 2))

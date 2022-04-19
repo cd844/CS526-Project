@@ -1,6 +1,6 @@
 import pandas as pd
 import dash
-from dash import Dash, html, dcc, Input, Output, callback
+from dash import Dash, html, dcc, Input, Output, State, callback
 import plotly.express as px
 import analytics as anal
 from db_connection import db
@@ -9,7 +9,7 @@ import pprint
 @callback(
     Output('lang-count-bar', 'figure'),
     Output('lang-bytes-bar', 'figure'),
-    Output('scatter', 'figure'),
+    Output('scatter-plot', 'figure'),
     Input('data-all', 'data'),
     Input('xaxis-col', 'value'),
     Input('yaxis-col', 'value'),
@@ -30,63 +30,6 @@ def update_plots(data_points, xaxis_col, yaxis_col):
     lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group", template = "plotly_dark")
     lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group",template = "plotly_dark")
     return lang_count_bar, lang_bytes_bar, scat 
-
-@callback(
-    Output('language-timeseries', 'figure'),
-    Input('data-all', 'data')
-)
-def update_language_timeseries(data_all):
-    try:
-        df = pd.read_json(data_all)
-    except:
-        print("update_time_series(), failed to read datapoints")
-        return
-    langs = ['JavaScript', 'Go', 'C++', 'C', 'Python', 'Rust', 'Ruby', 'TypeScript', 'C#']
-    time_data = anal.bin_languages_and_year(df['languages'], df['created_ts'], langs)
-    for lang in time_data.keys():
-        time_data[lang]['language'] = lang
-    
-    lang_bins_all = pd.concat([ time_data[k] for k in time_data.keys() ])
-    lang_bins_all = lang_bins_all.reset_index()
-    lang_bins_all['year'] = lang_bins_all['created_ts'].dt.year
-    max_y = lang_bins_all['count'].max() * 1.25
-
-    fig = px.scatter(lang_bins_all, x='language', y='count', title='Time Series ',color="language", animation_frame="year", size="count" ,animation_group="language",range_y=[0, max_y])
-    
-    return fig 
-
-
-# this does not need to run on startup
-@callback(
-    Output('focus', 'value'),
-    Output('data-select-info', 'children'),
-    Input('scatter', 'clickData'),
-    Input('language-comparison-violin-left', 'clickData')
-)
-def display_selected_scatter_data(selected_data_scatter, selected_data_violin):
-    if(len(dash.callback_context.triggered) > 1):
-        print("This might be a problem")
-        return 0, f"selected: None"
-    if(len(dash.callback_context.triggered) == 0):
-        return 0, f"selected: None"
-    trigger = dash.callback_context.triggered[0]
-    pp.pprint(trigger)
-    print(len(trigger['value']['points']))
-    if(trigger['prop_id'] == 'language-comparison-violin-left.clickData'):
-        print("violin update")
-        if(len(selected_data_violin['points']) != 1): # this might be enough to filter out non-point clicks
-            return
-        p = selected_data_violin['points'][0]['customdata'][0]
-        print(p)
-        return p, f"selected {selected_data_violin}"
-    elif(trigger['prop_id'] == 'scatter.clickData'):
-        print("scatter update")
-        id = (selected_data_scatter['points'][0]['customdata'][0])
-        return id, f"selected {selected_data_scatter}"
-    else:
-        print("This is definitely a problem")
-
-        return
 
 
 
@@ -128,12 +71,17 @@ Updates displayed repository info
 """
 @callback(
     Output('data-focus-info', 'children'),
-    Input('focus', 'value'),
-    Input('data-all', 'data'),
+    #Input('focus', 'value'),
+    Input('data-focus', 'data'),
+    State('data-all', 'data'),
 )
 def update_focus_info(focus, data_all):
+    print("update-focus-info")
     try:
-        focus_n= int(focus)
+        if(focus == None):
+            focus_n = 0
+        else:
+            focus_n= int(focus)
     except:
         print(f"Cannot cast limit '{focus}' to integer")
         return
@@ -160,68 +108,7 @@ def update_focus_info(focus, data_all):
     return html.Div(focus_markup)
 
 
-"""
-Updates language comparisons
-"""
-@callback(
-    Output('language-comparison-violin-left', 'figure'),
-    Output('language-comparison-timeseries-left', 'figure'),
-    Input('language-comparison-dropdown-left', 'value'),
-    Input('data-all', 'data')
-)
-def update_language_comparison_left(languages, data_all):
-    if(not isinstance(languages, list)):
-        languages = [languages]
-    df = pd.read_json(data_all)
-    
-    '''
-    timeseries code
-    '''
-    time_label = 'created_ts'
-    count_label = 'count'
-    lang_label = 'language'
-    
-    df[time_label] = anal.convert_pddatetime(df[time_label])
-    bins = anal.bin_languages_and_year(df['languages'], df[time_label], languages, time_resampling='3M')
-    time_points = pd.DataFrame(columns = [time_label, count_label, lang_label])
-    #print(time_points)
-    for b in bins:
-        bins[b][lang_label] = b
-        bins[b].index.names = [time_label]
-        bins[b] = bins[b].reset_index()
-        #print(bins[b])
-        time_points = pd.concat([time_points, bins[b]])
-    #print(time_points)
-    
-    '''
-    violin plot code
-    '''
-    print(df)
-    violin_y_label = 'watchers_count'
-    cols = df.columns.names.copy()
-    cols.append('df_index')
-    violin_points = pd.DataFrame(columns = cols)
-    
-    for lang in languages:
-        #print(type(df[time_label][0]))
-        violin_points_i = df[df.languages.apply(lambda x : lang in x)]
-        violin_points_i[lang_label] = lang
-        violin_points_i.index.names = ['df_index']
-        violin_points_i = violin_points_i.reset_index()
-        print(violin_points_i)
-        violin_points = pd.concat([violin_points, violin_points_i])
-        #filtered = filtered.sort_values(by=time_label)
-    
-    print(violin_points)
-    return px.violin(violin_points, y = violin_y_label, color = lang_label, box=True, hover_data = ['df_index', 'full_name'], points='all'), px.line(time_points, x=time_label, y = count_label, color = 'language')
-    #return , px.line(time_points, color = 'language')
-
-  
-
-
-
 scatter_plot_axes = ['forks_count', 'size', 'watchers_count', 'contributors_count']
-languages_dropdown = ['Java', 'Python', 'C', 'C++', 'JavaScript', 'PHP', 'Go', "TypeScript", 'CSS', 'React', 'Kotlin', 'Rust']
 layout = html.Div(children=[
 
         html.Div([
@@ -248,7 +135,7 @@ layout = html.Div(children=[
             ], id = 'countGraphContainer', className = "pretty_container"),
 
             html.Div([
-                html.Div(dcc.Graph(id = 'scatter')),
+                html.Div(dcc.Graph(id = 'scatter-plot')),
                 html.Div(dcc.Graph(id = 'language-timeseries')),
             ], id = 'aggregateGraphContainer', className = 'pretty_container eight columns'),
         ], className = 'row'),
@@ -264,7 +151,7 @@ layout = html.Div(children=[
             ], className = 'container rightCol'),
             html.Div([
                 html.P("Set a limit:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'limit', value = '100000', type='text')], className = 'dcc_control'),
+                html.Div([dcc.Input(id = 'limit', value = '1000', type='text')], className = 'dcc_control'),
             ], className='container rightCol'),
             html.Div([
                 html.P("Set a Focus:", className = 'control_label'),
@@ -279,17 +166,6 @@ layout = html.Div(children=[
                     'display': 'flex', 'flex-direction': 'column'
                 },
         ),
-        html.Div([
-            html.Div(
-                dcc.Dropdown(
-                    languages_dropdown, languages_dropdown[0:2], multi=True,
-                    id = 'language-comparison-dropdown-left',
-                    className = 'dcc_control'
-                )
-            ),
-            html.Div(dcc.Graph(id='language-comparison-violin-left')),
-            html.Div(dcc.Graph(id='language-comparison-timeseries-left')),
-        ]),
-        html.Div(id='test')
+        html.Div(id='violin-plot') # Hack to stop callback errors
 
 ], style = {'height': '4%', 'background-color' : '#000000'})
