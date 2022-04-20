@@ -64,6 +64,18 @@ class DatabaseInterface:
         #df['contributors'] = df['contributors'].apply(lambda x : json.loads(x)[0])
         return df
 
+
+    def construct_where(self, languages, min_watchers):
+        and_wheres = []
+        if(languages == None or len(languages) > 0):
+            and_wheres.append(' OR '.join([f'languages like "%""{l}""%"' for l in languages]))
+        if(min_watchers != None):
+            and_wheres.append(f'watchers_count > {min_watchers}')
+        and_wheres = [f'({w})' for w in and_wheres]
+        sql = ' AND '.join(and_wheres)
+        print(sql)
+        return sql
+
 def main():
     print("Test db")
     db_path = './data/new_repos.db'
