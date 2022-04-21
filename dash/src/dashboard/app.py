@@ -13,6 +13,7 @@ import analytics as anal
 import dash
 
 import pprint
+import ast 
 
 import graph_gen as gg
 from pages import main_layout, graph_layout, error_404,languages_layout 
@@ -22,6 +23,7 @@ pp = pprint.PrettyPrinter(indent = 4)
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
+data_all_file = 'data_all.csv'
 #app = Dash(__name__, external_stylesheets=external_stylesheets)
 
 app = Dash(__name__, suppress_callback_exceptions=False)
@@ -34,7 +36,9 @@ app.layout = html.Div([
     dcc.Store(id='data-all'),
     dcc.Store(id='data-filtered'),
     dcc.Store(id='data-focus'),
-    html.Div(id = 'page-content')
+    dcc.Store(id='graph_is_valid'),
+    html.Div(id = 'page-content'),
+    html.Div(id='dev-null', style = {'display' : 'none'})
 ])
 
 # this does not need to run on startup
@@ -47,7 +51,7 @@ app.layout = html.Div([
 )
 def display_selected_scatter_data(selected_data_scatter, selected_data_violin):
     if(len(dash.callback_context.triggered) > 1):
-        print("This might be a problem")
+        #print("This might be a problem")
         return 0, f'{0}'
     if(len(dash.callback_context.triggered) == 0):
         return 0, f"{0}"
@@ -63,8 +67,11 @@ def display_selected_scatter_data(selected_data_scatter, selected_data_violin):
         return p, f"selected {selected_data_violin}"
     elif(trigger['prop_id'] == 'scatter-plot.clickData'):
         print("scatter update")
-        id = (selected_data_scatter['points'][0]['customdata'][0])
-        return id, f"{id}"
+        print(selected_data_scatter['points'][0])
+        #id = (selected_data_scatter['points'][0]['customdata'][0])
+        pk = (selected_data_scatter['points'][0]['customdata'][2])
+        print(f"updating to {pk}")
+        return pk, f"{pk}"
     else:
         print("This is definitely a problem")
         return
@@ -78,6 +85,16 @@ def display_selected_scatter_data(selected_data_scatter, selected_data_violin):
 
     '''
 
+# lazy hack to access data outside of dash callbacks by saving it to disk
+@callback(
+    Output('dev-null', 'children'),
+    Input('data-all', 'data')
+)
+def write_data_to_file(data_all):
+    print("write_data_to_file")
+    df = pd.read_json(data_all)
+    df.to_csv(data_all_file)
+    return
 
 @callback(Output('page-content', 'children'),
     [Input('url', 'pathname')])
@@ -99,8 +116,14 @@ def graph_route():
     limit = 1000
     if('limit' in graph_args):
         limit = graph_args['limit']
+    if('source' in graph_args and graph_args['source'] == 'local'):
+        df = pd.read_csv(data_all_file)
+        #df['languages'] = df['languages'].apply(lambda x : json.loads(x))
+        df['topics'] = df['topics'].apply(lambda x : ast.literal_eval(x))
+        #df['contributors_count'] = df['contributors_count'].apply(lambda x : 1 if np.isnan(x) else x)
+    else:
+        df = db.db_to_dataframe(limit=limit)
 
-    df = db.db_to_dataframe(limit=limit)
     df = df[ df['topics'].map( lambda t : len(t)) > 0 ]
     graph = gg.get_nodes_and_edges(df)
     
@@ -108,6 +131,8 @@ def graph_route():
     nodes = graph['nodes'].to_dict(orient = 'records')
     edges = graph['edges'].to_dict(orient = 'records')
     print(f"generated graph |V|={len(nodes)}, |E|={len(edges)}")
+    if(len(nodes) == 0):
+        return render_template('graph_invalid.html')
     return render_template('graph_render.html', nodes = nodes, edges = edges)
 
 if __name__ == '__main__':

@@ -15,11 +15,12 @@ import pprint
     Input('yaxis-col', 'value'),
 )
 def update_plots(data_points, xaxis_col, yaxis_col):
+    print("updating plots")
     try:
         df = pd.read_json(data_points)
     except:
         print("update_plots(), failed to read datapoints:")
-        #print(data_points)
+        print(data_points)
         return
 
     scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name', size_max=60,
@@ -37,9 +38,10 @@ def update_plots(data_points, xaxis_col, yaxis_col):
     Output('data-all', 'data'),
     Input('limit', 'value'),
     Input('offset', 'value'),
-    Input('where', 'value'),
+    Input('min-watchers-filter-input', 'value'),
+    Input('languages-filter-input', 'value'),
 )
-def update_data(limit, offset, where):
+def update_data(limit, offset, min_watchers_filter_input, languages_filter_input):
     #num = 0
     try:
         limit_n= int(limit)
@@ -51,7 +53,28 @@ def update_data(limit, offset, where):
     except:
         print(f"Cannot cast limit '{offset}' to integer")
         return
+    min_watchers = None
     try:
+        min_watchers = int(min_watchers_filter_input)
+    except:
+        print(f"Cannot cast limit '{min_watchers_filter_input}' to integer")
+        return
+    try:
+        languages = languages_filter_input.split(',')
+        languages = [l.upper() for l in languages]
+        def check_row(languages, required_languages):
+            for req in required_languages:
+                if req in languages:
+                    return True
+            return False
+        while('' in languages):
+            languages.remove('')
+        #print("Languages")
+        #print(db.construct_where(languages, 100))
+    except:
+        print("Failed to construct where clause")
+    try:
+        where = db.construct_where(languages, min_watchers)
         df = db.db_to_dataframe(limit_n, offset_n, where)
     except Exception as e:
         print("Could not make query")
@@ -62,7 +85,18 @@ def update_data(limit, offset, where):
         )
         print(e)
         return pd.DataFrame()
-
+    print(f'Got {len(df)} results')
+    print(df)
+    '''
+    df_filtered = df
+    try:
+        df_filtered = df[df['languages'].apply(lambda x : check_row([l.upper() for l in x.keys()], languages))]
+    except Exception as e:
+        print(f"Failed to filter languages-filter-input: {languages_filter_input}")
+        print(e)
+        return
+    df = df_filtered
+    '''
     return df.to_json()
 
 
@@ -73,10 +107,11 @@ Updates displayed repository info
     Output('data-focus-info', 'children'),
     #Input('focus', 'value'),
     Input('data-focus', 'data'),
-    State('data-all', 'data'),
+    Input('data-all', 'data'),
 )
 def update_focus_info(focus, data_all):
-    print("update-focus-info")
+    print("update_focus_info")
+    print(focus)
     try:
         if(focus == None):
             focus_n = 0
@@ -86,7 +121,11 @@ def update_focus_info(focus, data_all):
         print(f"Cannot cast limit '{focus}' to integer")
         return
     df_m = pd.read_json(data_all)
-    df = df_m.iloc[focus_n]
+    df = df_m.loc[df_m['pk'] == focus_n].reset_index(drop = True)
+    if(len(df) != 1):
+        return html.Div("Select repository on scatterplot")
+    df = df.iloc[0]
+    print(f"Updating to:\n {df}")
 
     # initialize markup
     #focus_markup = [html.A(html.H2(df['name']), href=f"https://www.github.com/{df['full_name']}")]
@@ -142,8 +181,12 @@ layout = html.Div(children=[
 
         html.Div([
             html.Div([
-                html.P("Filter by:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'where', value = 'watchers_count > 1000', type='text')], className='dcc_control'),
+                html.P("Minimum watchers:", className = 'control_label'),
+                html.Div([dcc.Input(id = 'min-watchers-filter-input', value = '1000', type='text')], className='dcc_control'),
+            ], className = 'container rightCol'),
+            html.Div([
+                html.P("Languages Filter:", className = 'control_label'),
+                html.Div([dcc.Input(id = 'languages-filter-input', value = 'Java', type='text')], className = "dcc_control")
             ], className = 'container rightCol'),
             html.Div([
                 html.P("Offset:", className = 'control_label'),
@@ -151,13 +194,17 @@ layout = html.Div(children=[
             ], className = 'container rightCol'),
             html.Div([
                 html.P("Set a limit:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'limit', value = '1000', type='text')], className = 'dcc_control'),
+                html.Div([dcc.Input(id = 'limit', value = '10', type='text')], className = 'dcc_control'),
             ], className='container rightCol'),
             html.Div([
                 html.P("Set a Focus:", className = 'control_label'),
                 html.Div([dcc.Input(id = 'focus', value = '0', type='text')], className = "dcc_control")
             ], className = 'container rightCol')  
         ], className = 'pretty_container row'),
+        
+        html.Div([
+            html.A('Show Graph', href='/graph_render?source=local', target='_blank')
+        ]),
 
         html.Div([
                 html.Div(id = 'data-focus-info'),
