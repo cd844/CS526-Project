@@ -16,7 +16,7 @@ import pprint
 import ast 
 
 import graph_gen as gg
-from pages import main_layout, graph_layout, error_404,languages_layout 
+from pages import main_layout, graph_layout, error_404,languages_layout, top10_layout, insights_layout
 
 from db_connection import db
 pp = pprint.PrettyPrinter(indent = 4)
@@ -26,13 +26,45 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 data_all_file = 'data_all.csv'
 #app = Dash(__name__, external_stylesheets=external_stylesheets)
 
+debug = False
+
 app = Dash(__name__, suppress_callback_exceptions=False)
 app.layout = html.Div([
-    dcc.Location(id = 'url', refresh = False),
-    dcc.Link('Languages', href='/languages'),
+    html.Div(dcc.Location(id = 'url', refresh = False)),
     html.Div([
         html.Div(html.H4('GET THE REPO STORY'), className = 'eight columns')
     ], id = 'header', className = 'row'),
+    html.Div([
+        html.Div(dcc.Link('Main', href='/')),
+        html.Div(dcc.Link('Languages', href='/languages')),
+        html.Div(dcc.Link('Top 10', href='/top10')),
+        html.Div(dcc.Link('Insights', href='/insights')),
+    ], id = 'top-level-tabs'),
+    
+
+    html.Div([
+        html.Div([
+            html.P("Minimum watchers:", className = 'control_label'),
+            html.Div([dcc.Input(id = 'min-watchers-filter-input', value = '1000', type='text')], className='dcc_control'),
+        ], className = 'container rightCol'),
+        html.Div([
+            html.P("Languages Filter:", className = 'control_label'),
+            html.Div([dcc.Input(id = 'languages-filter-input', value = 'Java', type='text')], className = "dcc_control")
+        ], className = 'container rightCol'),
+        html.Div([
+            html.P("Set a limit:", className = 'control_label'),
+            html.Div([dcc.Input(id = 'limit', value = '10', type='text')], className = 'dcc_control'),
+        ], className='container rightCol'),
+        html.Div([
+            html.P("Offset:", className = 'control_label'),
+            html.Div([dcc.Input(id = 'offset', value = '0', type='text')], className='dcc_control'),
+        ], className = 'container rightCol'),
+        html.Div([
+           html.P("Set a Focus:", className = 'control_label'),
+            html.Div([dcc.Input(id = 'focus', value = '0', type='text')], className = "dcc_control")
+        ], className = 'container rightCol', style = {'display' : 'block' if debug is True else 'none'})  
+    ], className = 'pretty_container row'),
+        
     dcc.Store(id='data-all'),
     dcc.Store(id='data-filtered'),
     dcc.Store(id='data-focus'),
@@ -106,6 +138,10 @@ def display_page(pathname):
         return languages_layout.layout
     elif(pathname == '/graph'):
         return graph_layout.layout
+    elif(pathname == '/top10'):
+        return top10_layout.layout
+    elif(pathname == '/insights'):
+        return insights_layout.layout
     else:
         return error_404.layout
 

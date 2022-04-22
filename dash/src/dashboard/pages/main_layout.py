@@ -74,7 +74,7 @@ def update_data(limit, offset, min_watchers_filter_input, languages_filter_input
     except:
         print("Failed to construct where clause")
     try:
-        where = db.construct_where(languages, min_watchers)
+        where = db.construct_where(languages, True, min_watchers)
         df = db.db_to_dataframe(limit_n, offset_n, where)
     except Exception as e:
         print("Could not make query")
@@ -180,31 +180,9 @@ layout = html.Div(children=[
         ], className = 'row'),
 
         html.Div([
-            html.Div([
-                html.P("Minimum watchers:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'min-watchers-filter-input', value = '1000', type='text')], className='dcc_control'),
-            ], className = 'container rightCol'),
-            html.Div([
-                html.P("Languages Filter:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'languages-filter-input', value = 'Java', type='text')], className = "dcc_control")
-            ], className = 'container rightCol'),
-            html.Div([
-                html.P("Offset:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'offset', value = '0', type='text')], className='dcc_control'),
-            ], className = 'container rightCol'),
-            html.Div([
-                html.P("Set a limit:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'limit', value = '10', type='text')], className = 'dcc_control'),
-            ], className='container rightCol'),
-            html.Div([
-                html.P("Set a Focus:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'focus', value = '0', type='text')], className = "dcc_control")
-            ], className = 'container rightCol')  
-        ], className = 'pretty_container row'),
-        
-        html.Div([
-                html.Div(id = 'data-focus-info')],
-                className = 'pretty_container',
+                html.Div(id = 'data-focus-info')
+        ],
+        className = 'pretty_container',
         ),
         html.Div([
             html.A('Show 3D Graph', href='/graph_render?source=local', target='_blank')
