@@ -203,16 +203,13 @@ layout = html.Div(children=[
         ], className = 'pretty_container row'),
         
         html.Div([
-            html.A('Show Graph', href='/graph_render?source=local', target='_blank')
+                html.Div(id = 'data-focus-info')],
+                className = 'pretty_container',
+        ),
+        html.Div([
+            html.A('Show 3D Graph', href='/graph_render?source=local', target='_blank')
         ]),
 
-        html.Div([
-                html.Div(id = 'data-focus-info'),
-                html.Div(id = 'data-select-info')
-                ], style = {
-                    'display': 'flex', 'flex-direction': 'column'
-                },
-        ),
         html.Div(id='violin-plot') # Hack to stop callback errors
 
 ], style = {'height': '4%', 'background-color' : '#000000'})
