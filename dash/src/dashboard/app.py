@@ -52,6 +52,10 @@ app.layout = html.Div([
             html.Div([dcc.Input(id = 'languages-filter-input', value = 'Java', type='text')], className = "dcc_control")
         ], className = 'container rightCol'),
         html.Div([
+            html.P("languages search logic", className= 'control_label'),
+            html.Div([dcc.RadioItems(['OR', 'AND'], 'OR', id = 'languages-logic-input')], className = 'dcc_control')
+        ], className = 'container rightCol'),
+        html.Div([
             html.P("Set a limit:", className = 'control_label'),
             html.Div([dcc.Input(id = 'limit', value = '10', type='text')], className = 'dcc_control'),
         ], className='container rightCol'),
@@ -72,6 +76,74 @@ app.layout = html.Div([
     html.Div(id = 'page-content'),
     html.Div(id='dev-null', style = {'display' : 'none'})
 ])
+
+
+@callback(
+    Output('data-all', 'data'),
+    Input('limit', 'value'),
+    Input('offset', 'value'),
+    Input('min-watchers-filter-input', 'value'),
+    Input('languages-filter-input', 'value'),
+    Input('languages-logic-input', 'value'),
+)
+def update_data(limit, offset, min_watchers_filter_input, languages_filter_input, languages_logic_input):
+    #num = 0
+    try:
+        limit_n= int(limit)
+    except:
+        print(f"Cannot cast limit '{limit}' to integer")
+        return
+    try:
+        offset_n = int(offset)
+    except:
+        print(f"Cannot cast limit '{offset}' to integer")
+        return
+    min_watchers = None
+    try:
+        min_watchers = int(min_watchers_filter_input)
+    except:
+        print(f"Cannot cast limit '{min_watchers_filter_input}' to integer")
+        return
+    try:
+        languages = languages_filter_input.split(',')
+        languages = [l.upper() for l in languages]
+        def check_row(languages, required_languages):
+            for req in required_languages:
+                if req in languages:
+                    return True
+            return False
+        while('' in languages):
+            languages.remove('')
+        #print("Languages")
+        #print(db.construct_where(languages, 100))
+    except:
+        print("Failed to construct where clause")
+    try:
+        where = db.construct_where(languages, True if languages_logic_input == 'OR' else False, min_watchers)
+        print(f"WHERE clause: {where}")
+        df = db.db_to_dataframe(limit_n, offset_n, where)
+    except Exception as e:
+        print("Could not make query")
+        print(
+        f'''limit_n: {limit_n}
+        offset_n: {offset_n}
+        where: {where}'''
+        )
+        print(e)
+        return pd.DataFrame()
+    print(f'Got {len(df)} results')
+    print(df)
+    '''
+    df_filtered = df
+    try:
+        df_filtered = df[df['languages'].apply(lambda x : check_row([l.upper() for l in x.keys()], languages))]
+    except Exception as e:
+        print(f"Failed to filter languages-filter-input: {languages_filter_input}")
+        print(e)
+        return
+    df = df_filtered
+    '''
+    return df.to_json()
 
 # this does not need to run on startup
 # 

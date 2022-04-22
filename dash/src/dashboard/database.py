@@ -65,10 +65,13 @@ class DatabaseInterface:
         return df
 
 
-    def construct_where(self, languages, min_watchers):
+    def construct_where(self, languages, languages_or, min_watchers):
         and_wheres = []
         if(languages == None or len(languages) > 0):
-            and_wheres.append(' OR '.join([f'languages like "%""{l}""%"' for l in languages]))
+            if languages_or == False:
+                and_wheres.append(' AND '.join([f'languages like "%""{l}""%"' for l in languages]))
+            else:
+                and_wheres.append(' OR '.join([f'languages like "%""{l}""%"' for l in languages]))
         if(min_watchers != None):
             and_wheres.append(f'watchers_count > {min_watchers}')
         and_wheres = [f'({w})' for w in and_wheres]
