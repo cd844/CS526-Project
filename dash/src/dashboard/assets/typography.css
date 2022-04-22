@@ -117,14 +117,15 @@
     font-size: 1.5em; /* currently ems cause chrome bug misinterpreting rems on body element */
     line-height: 1.6;
     font-weight: 400;
-    font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    color: rgb(245, 238, 238);
-    background-color: #000000;
+    font-family: 'Consolas', 'monospace', "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    /*color: rgb(245, 238, 238);*/
+    color: rgb(12, 11, 11);
+    background-color: rgb(12, 11, 11);
     margin: 5%;
   }
   .pretty_container {
     border-radius: 5px;
-    background-color: #000000;
+    background-color: #eeecec;
     margin: 10px;
     padding: 15px;
     position: relative;
@@ -197,8 +198,10 @@
   }
   
   #header {
-    align-items: center;
-    color: rgb(5, 168, 160)
+    float: center;
+    color: #eeecec;
+    background-color: rgb(12, 11, 11);
+    font-family: 'Consolas';
   }
   
   #learnMore {
