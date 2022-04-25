@@ -13,7 +13,7 @@ class DatabaseInterface:
         self.connection_def = con
         self.connection_type = con_type
         
-    def db_to_dataframe(self, limit = 100000, offset = 0, where = None):
+    def db_to_dataframe(self, limit = 100000, offset = 0, where = None, order_by_col = None, order_by_desc = True):
         """
         Example Row:
         name                                     ahoarau/ethercat-drivers
@@ -36,11 +36,14 @@ class DatabaseInterface:
         query_s = "SELECT * FROM repos"
         if where != None:
             query_s += f" WHERE {where}"
+        if order_by_col != None:
+            query_s += f" ORDER BY {order_by_col} { 'DESC' if order_by_desc else 'ASC' }"
         query_s += " LIMIT (?) OFFSET (?)"
 
         if(self.debug):
-            print(query_s)
+            con.set_trace_callback(print)
         rows = cur.execute(query_s, (limit, offset))
+        con.set_trace_callback(None)
 
         attributes = [description[0] for description in cur.description]
         data = dict()
@@ -84,12 +87,16 @@ def main():
     db_path = './data/new_repos.db'
     db_type = 'sqlite'
     db = DatabaseInterface(db_path, db_type)
+    db.debug = True
     
-    df = db.db_to_dataframe(300000)
-    print(df.columns)
-    filtered = df[df['topics'].apply(lambda x : len(x) > 0)]
-    print(filtered)
-    filtered.to_csv('filtered_topics.csv')
+    where = db.construct_where(None, min_watchers=10)
+    print(where)
+    df = db.db_to_dataframe(10, where = where, order_by_col='watchers_count', order_by_desc=False)
+    print(df[['full_name', 'watchers_count']])
+    #df = db.db_to_dataframe(10)
+    #jfiltered = df[df['topics'].apply(lambda x : len(x) > 0)]
+    #print(filtered)
+    #filtered.to_csv('filtered_topics.csv')
 
 
 if __name__=='__main__':

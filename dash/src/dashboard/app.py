@@ -74,7 +74,7 @@ app.layout = html.Div([
     dcc.Store(id='data-focus'),
     dcc.Store(id='graph_is_valid'),
     html.Div(id = 'page-content'),
-    html.Div(id='dev-null', style = {'display' : 'none'})
+    html.Div(id ='dev-null', style = {'display' : 'none'})
 ])
 
 
@@ -121,7 +121,7 @@ def update_data(limit, offset, min_watchers_filter_input, languages_filter_input
     try:
         where = db.construct_where(languages, True if languages_logic_input == 'OR' else False, min_watchers)
         print(f"WHERE clause: {where}")
-        df = db.db_to_dataframe(limit_n, offset_n, where)
+        df = db.db_to_dataframe(limit_n, offset_n, where, order_by_col='watchers_count')
     except Exception as e:
         print("Could not make query")
         print(
@@ -133,16 +133,6 @@ def update_data(limit, offset, min_watchers_filter_input, languages_filter_input
         return pd.DataFrame()
     print(f'Got {len(df)} results')
     print(df)
-    '''
-    df_filtered = df
-    try:
-        df_filtered = df[df['languages'].apply(lambda x : check_row([l.upper() for l in x.keys()], languages))]
-    except Exception as e:
-        print(f"Failed to filter languages-filter-input: {languages_filter_input}")
-        print(e)
-        return
-    df = df_filtered
-    '''
     return df.to_json()
 
 # this does not need to run on startup
