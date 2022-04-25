@@ -21,8 +21,6 @@ from pages import main_layout, graph_layout, error_404,languages_layout, top10_l
 from db_connection import db
 pp = pprint.PrettyPrinter(indent = 4)
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
 data_all_file = 'data_all.csv'
 #app = Dash(__name__, external_stylesheets=external_stylesheets)
 
@@ -32,7 +30,7 @@ app = Dash(__name__, suppress_callback_exceptions=False)
 app.layout = html.Div([
     html.Div(dcc.Location(id = 'url', refresh = False)),
     html.Div([
-        html.Div(html.H4('GET THE REPO STORY'), className = 'eight columns')
+        html.Div(html.H1('GET THE REPO STORY'), className = 'eight columns')
     ], id = 'header', className = 'row'),
     html.Div([
         html.Div(dcc.Link('Main', href='/')),
@@ -56,13 +54,13 @@ app.layout = html.Div([
             html.Div([dcc.RadioItems(['OR', 'AND'], 'OR', id = 'languages-logic-input')], className = 'dcc_control')
         ], className = 'container rightCol'),
         html.Div([
-            html.P("Set a limit:", className = 'control_label'),
-            html.Div([dcc.Input(id = 'limit', value = '10', type='text')], className = 'dcc_control'),
+            html.P("Maximum displayed:", className = 'control_label'),
+            html.Div([dcc.Input(id = 'limit', value = '10000', type='text')], className = 'dcc_control'),
         ], className='container rightCol'),
         html.Div([
             html.P("Offset:", className = 'control_label'),
             html.Div([dcc.Input(id = 'offset', value = '0', type='text')], className='dcc_control'),
-        ], className = 'container rightCol'),
+        ], className = 'container rightCol', style = {'display' : 'block' if debug is True else 'none'}),
         html.Div([
            html.P("Set a Focus:", className = 'control_label'),
             html.Div([dcc.Input(id = 'focus', value = '0', type='text')], className = "dcc_control")

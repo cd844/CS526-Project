@@ -6,6 +6,7 @@ import analytics as anal
 from db_connection import db
 
 import pprint
+
 @callback(
     Output('lang-count-bar', 'figure'),
     Output('lang-bytes-bar', 'figure'),
