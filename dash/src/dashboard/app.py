@@ -32,14 +32,21 @@ app.layout = html.Div([
     html.Div([
         html.Div(html.H1('GET THE REPO STORY'), className = 'eight columns')
     ], id = 'header', className = 'row'),
-    html.Div([
-        html.Div(dcc.Link('Main', href='/')),
-        html.Div(dcc.Link('Languages', href='/languages')),
-        html.Div(dcc.Link('Top 10', href='/top10')),
-        html.Div(dcc.Link('Insights', href='/insights')),
-    ], id = 'top-level-tabs'),
+    #html.Div([
+    #    html.Div(dcc.Link('Main', href='/')),
+    #    html.Div(dcc.Link('Languages', href='/languages')),
+    #    html.Div(dcc.Link('Top 10', href='/top10')),
+    #    html.Div(dcc.Link('Insights', href='/insights')),
+    #], id = 'top-level-tabs'),
     
-
+    html.Div([
+        dcc.Tabs(id = "navigation-tabs", value = "main", children = [
+            dcc.Tab(label = "Scatter plot", value = "main"),
+            dcc.Tab(label = "Language Comparison", value = "languages"),
+            dcc.Tab(label = 'Ranked list', value = "list"),
+            dcc.Tab(label = 'Insights', value = "insights")
+        ])
+    ]),
     html.Div([
         html.Div([
             html.P("Minimum watchers:", className = 'control_label'),
@@ -66,6 +73,8 @@ app.layout = html.Div([
             html.Div([dcc.Input(id = 'focus', value = '0', type='text')], className = "dcc_control")
         ], className = 'container rightCol', style = {'display' : 'block' if debug is True else 'none'})  
     ], className = 'pretty_container row'),
+
+    html.Div(['loading data...'], id = 'data-all-count', className = 'pretty_container'),
         
     dcc.Store(id='data-all'),
     dcc.Store(id='data-filtered'),
@@ -75,9 +84,9 @@ app.layout = html.Div([
     html.Div(id ='dev-null', style = {'display' : 'none'})
 ])
 
-
 @callback(
     Output('data-all', 'data'),
+    Output('data-all-count', 'children'),
     Input('limit', 'value'),
     Input('offset', 'value'),
     Input('min-watchers-filter-input', 'value'),
@@ -129,9 +138,10 @@ def update_data(limit, offset, min_watchers_filter_input, languages_filter_input
         )
         print(e)
         return pd.DataFrame()
-    print(f'Got {len(df)} results')
+    count = len(df)
+    count_str = f'Retrieved {count} results'
     print(df)
-    return df.to_json()
+    return df.to_json(), count_str
 
 # this does not need to run on startup
 # 
@@ -187,7 +197,22 @@ def write_data_to_file(data_all):
     df = pd.read_json(data_all)
     df.to_csv(data_all_file)
     return
+@callback(Output('page-content', 'children'),
+    [Input('navigation-tabs', 'value')])
+def display_page(nav_tab):
+    print(nav_tab)
+    if(nav_tab == 'main'):
+        return main_layout.layout
+    elif(nav_tab == 'languages'):
+        return languages_layout.layout
+    elif(nav_tab == 'list'):
+        return top10_layout.layout
+    elif(nav_tab == 'insights'):
+        return insights_layout.layout
+    else:
+        return error_404.layout
 
+'''
 @callback(Output('page-content', 'children'),
     [Input('url', 'pathname')])
 def display_page(pathname):
@@ -204,6 +229,7 @@ def display_page(pathname):
         return insights_layout.layout
     else:
         return error_404.layout
+'''
 
 @app.server.route('/graph_render', methods = ['GET'])
 def graph_route():
