@@ -1,4 +1,5 @@
 from cmath import log
+from pydoc import classname
 from re import template
 from tkinter import W
 from tkinter.ttk import Style
@@ -27,10 +28,35 @@ data_all_file = 'data_all.csv'
 debug = False
 
 app = Dash(__name__, suppress_callback_exceptions=False)
+
+tab_style = {
+    'backgroundColor': 'rgb(12, 11, 11)'
+}
+
+tab_select = {
+    'color': '#eeecec',
+    'borderTop': '4px solid #7F00FF',
+    'backgroundColor': 'rgb(12, 11, 11)'
+}
+
 app.layout = html.Div([
     html.Div(dcc.Location(id = 'url', refresh = False)),
     html.Div([
-        html.Div(html.H1('GET THE REPO STORY'), className = 'eight columns')
+        html.Div([
+            html.Img(
+                src = "https://www.sferalabs.cc/wp-content/uploads/github-logo-white.png",
+                className = 'three columns'
+            ),
+            html.H2('GET THE REPO STORY')
+        ], className = 'five columns'),
+        html.Div([
+            dcc.Tabs(id = "navigation-tabs", value = "main", children = [
+                dcc.Tab(label = "Scatter plot", value = "main", className = 'custom_tab', style = tab_style, selected_style=tab_select),
+                dcc.Tab(label = "Language Comparison", value = "languages", className = 'custom_tab', style = tab_style, selected_style=tab_select),
+                dcc.Tab(label = 'Ranked list', value = "list", className = 'custom_tab', style = tab_style, selected_style=tab_select),
+                dcc.Tab(label = 'Insights', value = "insights", className = 'custom_tab', style = tab_style, selected_style=tab_select)
+            ], className = 'custom_tab')
+        ], className = 'container rightCol'),
     ], id = 'header', className = 'row'),
     #html.Div([
     #    html.Div(dcc.Link('Main', href='/')),
@@ -39,14 +65,6 @@ app.layout = html.Div([
     #    html.Div(dcc.Link('Insights', href='/insights')),
     #], id = 'top-level-tabs'),
     
-    html.Div([
-        dcc.Tabs(id = "navigation-tabs", value = "main", children = [
-            dcc.Tab(label = "Scatter plot", value = "main"),
-            dcc.Tab(label = "Language Comparison", value = "languages"),
-            dcc.Tab(label = 'Ranked list', value = "list"),
-            dcc.Tab(label = 'Insights', value = "insights")
-        ])
-    ]),
     html.Div([
         html.Div([
             html.P("Minimum watchers:", className = 'control_label'),
@@ -184,7 +202,6 @@ def display_selected_scatter_data(selected_data_scatter, selected_data_violin):
         return id, f"{id}"
     else:
         print("Error")
-
     '''
 
 # lazy hack to access data outside of dash callbacks by saving it to disk
