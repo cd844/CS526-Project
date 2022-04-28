@@ -40,6 +40,7 @@ Updates displayed repository info
 """
 @callback(
     Output('data-focus-info', 'children'),
+    #Output('data-focus-lang-figure', 'children'),
     #Input('focus', 'value'),
     Input('data-focus', 'data'),
     Input('data-all', 'data'),
@@ -79,7 +80,18 @@ def update_focus_info(focus, data_all):
     focus_markup += [f"forks_count: {df.forks_count}", html.Br()]
     focus_markup += ["license: ", html.A(df.license['name'], href = df.license['url']), html.Br()]
 
-    return html.Div(focus_markup)
+    print(df['languages'])
+    langs = []
+    l_bytes = []
+    for l in df['languages'].keys():
+        langs.append(l)
+        l_bytes.append(df['languages'][l])
+    print(langs)
+    print(l_bytes)
+    fig = px.pie(  values = l_bytes, names = langs, hole = 0.3)
+    #fig = px.pie({'languages': langs, 'bytes': l_bytes,)
+
+    return [html.Div(focus_markup), html.Div(dcc.Graph(figure=fig))]
 
 
 scatter_plot_axes = ['forks_count', 'size', 'watchers_count', 'contributors_count']
@@ -115,9 +127,8 @@ layout = html.Div(children=[
         ], className = 'row'),
 
         html.Div([
-                html.Div(id = 'data-focus-info')
-        ],
-        className = 'pretty_container',
+        ],id = 'data-focus-info',
+        className = 'pretty_container row',
         ),
         html.Div([
             dcc.Link(html.Button('Show 3D Graph'), href='/graph_render?source=local', target='_blank',
