@@ -120,8 +120,12 @@ layout = html.Div(children=[
         className = 'pretty_container',
         ),
         html.Div([
-            html.A('Show 3D Graph', href='/graph_render?source=local', target='_blank')
+            dcc.Link(html.Button('Show 3D Graph'), href='/graph_render?source=local', target='_blank',
+            className = 'pretty_container')
+            #html.A('Show 3D Graph', href='/graph_render?source=local', target='_blank')
         ]),
+
+        #style={'font-size': '12px', 'width': '140px', 'display': 'inline-block', 'margin-bottom': '10px', 'margin-right': '5px', 'height':'25px'}
 
         html.Div(id='violin-plot') # Hack to stop callback errors
 
