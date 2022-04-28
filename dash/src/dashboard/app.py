@@ -17,6 +17,7 @@ import pprint
 import ast 
 
 import graph_gen as gg
+import graph_gen_2d as gg2
 from pages import main_layout, graph_layout, error_404,languages_layout, top10_layout, insights_layout
 
 from db_connection import db
@@ -274,6 +275,33 @@ def graph_route():
         return render_template('graph_invalid.html')
     return render_template('graph_render.html', nodes = nodes, edges = edges)
 
+@app.server.route('/graph_render_2d', methods = ['GET'])
+def graph_route2():
+    graph_args = request.args
+    print(graph_args)
+    limit = 1000
+    if('limit' in graph_args):
+        limit = graph_args['limit']
+    if('source' in graph_args and graph_args['source'] == 'local'):
+        df = pd.read_csv(data_all_file)
+        #df['languages'] = df['languages'].apply(lambda x : json.loads(x))
+        df['topics'] = df['topics'].apply(lambda x : ast.literal_eval(x))
+        #df['contributors_count'] = df['contributors_count'].apply(lambda x : 1 if np.isnan(x) else x)
+    else:
+        df = db.db_to_dataframe(limit=limit)
+
+    df = df[ df['topics'].map( lambda t : len(t)) > 0 ]
+    graph = gg2.get_nodes_and_edges(df)
+    
+    #nodes = graph['nodes'].to_json(orient = 'records')
+    nodes = graph['nodes'].to_dict(orient = 'records')
+    edges = graph['edges'].to_dict(orient = 'records')
+    print(f"generated graph |V|={len(nodes)}, |E|={len(edges)}")
+    if(len(nodes) == 0):
+        return render_template('graph_invalid.html')
+    #nodes = [{'id': 'A'}, {'id':'B'}]
+    #edges = [{'source': 'A', 'target':'B'}]
+    return render_template('graph_render_2d.html', nodes = nodes, edges = edges)
 if __name__ == '__main__':
     print("starting server")
     app.run_server(debug=True)

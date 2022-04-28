@@ -1,0 +1,41 @@
+
+<head>
+  <style> body { margin: 0; } </style>
+
+  <script src="//unpkg.com/force-graph"></script>
+    <!--<script src="../../dist/3d-force-graph.js"></script>-->
+  <script> 
+    var data = {
+      "nodes":
+      {{ nodes|safe }},
+      "links": 
+      {{ edges|safe }}
+    }
+    </script>
+  <!--<script src="../../dist/force-graph.js"></script>-->
+</head>
+
+<body>
+<div id="graph"></div>
+<!--https://raw.githubusercontent.com/nairutii/CS526/main/-->
+<script>
+    const elem = document.getElementById('graph');
+
+    const Graph = ForceGraph({controlType: 'orbit'})(elem)
+      .graphData(data)
+      .nodeLabel('id')
+      .nodeAutoColorBy('id')
+      .nodeVal('count')
+
+      .linkWidth("weight")
+      .linkDirectionalParticles(2)
+      .linkDirectionalParticleWidth(1.4)
+      .onNodeClick(node => {
+
+        Graph.centerAt(node.x, node.y, 1000);
+        Graph.zoom(8, 2000);
+      });
+</script>
+</body>
+
+
