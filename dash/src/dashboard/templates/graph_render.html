@@ -29,6 +29,6 @@
 
       const Graph = ForceGraph3D({controlType: 'orbit'})
         (document.getElementById('3d-graph'))
-          .graphData(gData).nodeLabel(node =>`${node.id}`).nodeAutoColorBy('id');
+          .graphData(gData).nodeLabel(node =>`${node.id}`).nodeAutoColorBy('id').linkWidth('weight');
     </script>
   </body>

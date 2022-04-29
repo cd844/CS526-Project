@@ -147,7 +147,7 @@ def update_data(limit, offset, min_watchers_filter_input, languages_filter_input
     try:
         where = db.construct_where(languages, True if languages_logic_input == 'OR' else False, min_watchers)
         print(f"WHERE clause: {where}")
-        df = db.db_to_dataframe(limit_n, offset_n, where, order_by_col='watchers_count')
+        df = db.db_to_dataframe(limit = limit_n, offset = offset_n, where = where, order_by_col='watchers_count')
     except Exception as e:
         print("Could not make query")
         print(
@@ -230,30 +230,13 @@ def display_page(nav_tab):
     else:
         return error_404.layout
 
-'''
-@callback(Output('page-content', 'children'),
-    [Input('url', 'pathname')])
-def display_page(pathname):
-    print(pathname)
-    if(pathname == '/'):
-        return main_layout.layout
-    elif(pathname == '/languages'):
-        return languages_layout.layout
-    elif(pathname == '/graph'):
-        return graph_layout.layout
-    elif(pathname == '/top10'):
-        return top10_layout.layout
-    elif(pathname == '/insights'):
-        return insights_layout.layout
-    else:
-        return error_404.layout
-'''
 
 @app.server.route('/graph_render', methods = ['GET'])
 def graph_route():
     graph_args = request.args
     print(graph_args)
     limit = 1000
+    filter = None
     if('limit' in graph_args):
         limit = graph_args['limit']
     if('source' in graph_args and graph_args['source'] == 'local'):
@@ -270,6 +253,16 @@ def graph_route():
     #nodes = graph['nodes'].to_json(orient = 'records')
     nodes = graph['nodes'].to_dict(orient = 'records')
     edges = graph['edges'].to_dict(orient = 'records')
+
+    #lazily filter out
+    if('topics' in graph_args):
+        filter = graph_args['topics'].split(';')
+        g = anal.graph_filter(graph, filter)
+        nodes = g['nodes']
+        edges = g['edges']
+        print(nodes)
+
+
     print(f"generated graph |V|={len(nodes)}, |E|={len(edges)}")
     if(len(nodes) == 0):
         return render_template('graph_invalid.html')

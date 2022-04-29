@@ -40,6 +40,7 @@ Updates displayed repository info
 """
 @callback(
     Output('data-focus-info', 'children'),
+    Output('3d-graph-topics', 'href'),
     #Output('data-focus-lang-figure', 'children'),
     #Input('focus', 'value'),
     Input('data-focus', 'data'),
@@ -91,7 +92,7 @@ def update_focus_info(focus, data_all):
     fig = px.pie(  values = l_bytes, names = langs, hole = 0.3)
     #fig = px.pie({'languages': langs, 'bytes': l_bytes,)
 
-    return [html.Div(focus_markup), html.Div(dcc.Graph(figure=fig))]
+    return [html.Div(focus_markup), html.Div(dcc.Graph(figure=fig))], f'/graph_render?source=local&topics={";".join(df["topics"])}'
 
 
 scatter_plot_axes = ['forks_count', 'size', 'watchers_count', 'contributors_count']
@@ -134,7 +135,9 @@ layout = html.Div(children=[
             dcc.Link(html.Button('Show 3D Graph'), href='/graph_render?source=local', target='_blank',
             className = 'pretty_container'),
             dcc.Link(html.Button('Show 2D Graph'), href='/graph_render_2d?source=local', target='_blank',
-            className = 'pretty_container')
+            className = 'pretty_container'),
+            dcc.Link(html.Button('Show 3D Graph (Topics)'), id = '3d-graph-topics', href='', target='_blank',
+            className = 'pretty_container'),
             #html.A('Show 3D Graph', href='/graph_render?source=local', target='_blank')
         ]),
 

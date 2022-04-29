@@ -83,3 +83,24 @@ def bin_languages_and_year(languages, time, language_bins=['JavaScript', 'Shell'
         bins[l] = filtered.resample(time_resampling).count()
         bins[l] = bins[l].rename(columns = {'languages' : 'count'})
     return bins
+
+# filter out nodes and edges not in filter
+def graph_filter(graph, filter):
+    nodes = []
+    edges = []
+    nodes_ids = [n for n in filter]
+    for e in graph['edges'].to_dict(orient = 'records'):
+        if(e['source'] in filter or e['target'] in filter):
+            edges.append(e)
+            if(e['source'] not in nodes):
+                nodes_ids.append(e['source'])
+            if(e['target'] not in nodes):
+                nodes_ids.append(e['target'])
+    for n in graph['nodes'].to_dict(orient = 'records'):
+        if n['id'] in nodes_ids:
+            nodes.append(n)
+    print(nodes)
+    graph = dict()
+    graph['nodes'] = nodes
+    graph['edges'] = edges
+    return graph

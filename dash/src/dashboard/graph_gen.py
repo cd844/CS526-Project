@@ -100,6 +100,8 @@ def get_nodes_and_edges(df):
     graph['edges'] = create_edges(final_list)
     return graph
 
+
+
 def main():
     from db_connection import db
     df = db.db_to_dataframe(limit=100000)
