@@ -2,6 +2,9 @@
     <style> body { margin: 0; } </style>
 
     <script src="http://unpkg.com/3d-force-graph"></script>
+    <script src="https://unpkg.com/three"></script>
+    <script src="//unpkg.com/d3-octree"></script>
+    <script src="//unpkg.com/d3-force-3d"></script>
     <!--<script src="../../dist/3d-force-graph.js"></script>-->
     <script> 
     var dict = {
@@ -17,18 +20,36 @@
     <div id="3d-graph"></div>
 
     <script>
-
-
-
+      node_size_scale = 10
       const gData = {
-
           nodes:dict["nodes"],
           links:dict["links"],
 
       };
 
+      const sizeFun = (node) => {
+        return Math.log( node.degree ) / Math.log(1.5) + 2.5
+
+      }
       const Graph = ForceGraph3D({controlType: 'orbit'})
         (document.getElementById('3d-graph'))
-          .graphData(gData).nodeLabel(node =>`${node.id}`).nodeAutoColorBy('id').linkWidth('weight');
+          .graphData(gData)
+          .nodeLabel((node) => {
+            return "Name: " + node.id + "<br>"
+            + "Degree: " + node.degree + "<br>"
+            + "Size: " + sizeFun(node)+ "<br>"
+          })
+          .nodeThreeObject( (node) => new THREE.Mesh(
+            new THREE.SphereGeometry( sizeFun(node) ),
+            new THREE.MeshLambertMaterial({
+              color: Math.round(Math.random() * Math.pow(2, 24)), //TODO: Color based on something idk
+              transparent: true,
+              opacity: 0.75
+            })
+          ))
+          .nodeAutoColorBy( (node) => (Math.log(node.weight)))
+          .linkWidth('weight');
+      
+      Graph.cooldownTime(Infinity).d3Force('collide', d3.forceCollide(Graph.nodeRelSize()))
     </script>
   </body>

@@ -89,14 +89,14 @@ def graph_filter(graph, filter):
     nodes = []
     edges = []
     nodes_ids = [n for n in filter]
-    for e in graph['edges'].to_dict(orient = 'records'):
+    for e in graph['edges']:
         if(e['source'] in filter or e['target'] in filter):
             edges.append(e)
             if(e['source'] not in nodes):
                 nodes_ids.append(e['source'])
             if(e['target'] not in nodes):
                 nodes_ids.append(e['target'])
-    for n in graph['nodes'].to_dict(orient = 'records'):
+    for n in graph['nodes']:
         if n['id'] in nodes_ids:
             nodes.append(n)
     print(nodes)

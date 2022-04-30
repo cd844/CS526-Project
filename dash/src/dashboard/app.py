@@ -249,6 +249,8 @@ def graph_route():
 
     df = df[ df['topics'].map( lambda t : len(t)) > 0 ]
     graph = gg.get_nodes_and_edges(df)
+    graph['nodes'] = graph['nodes'].to_dict(orient = 'records')
+    graph['edges'] = graph['edges'].to_dict(orient = 'records')
     
     #nodes = graph['nodes'].to_json(orient = 'records')
     #nodes = graph['nodes'].to_dict(orient = 'records')
