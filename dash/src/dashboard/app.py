@@ -251,22 +251,24 @@ def graph_route():
     graph = gg.get_nodes_and_edges(df)
     
     #nodes = graph['nodes'].to_json(orient = 'records')
-    nodes = graph['nodes'].to_dict(orient = 'records')
-    edges = graph['edges'].to_dict(orient = 'records')
+    #nodes = graph['nodes'].to_dict(orient = 'records')
+    #edges = graph['edges'].to_dict(orient = 'records')
 
     #lazily filter out
     if('topics' in graph_args):
         filter = graph_args['topics'].split(';')
-        g = anal.graph_filter(graph, filter)
-        nodes = g['nodes']
-        edges = g['edges']
-        print(nodes)
+        graph = anal.graph_filter(graph, filter)
+        #print(nodes)
+    
 
+    # calculate edges
+    graph = anal.calculate_graph_degrees(graph)
+    print(graph)
 
-    print(f"generated graph |V|={len(nodes)}, |E|={len(edges)}")
-    if(len(nodes) == 0):
+    print(f"generated graph |V|={len(graph['nodes'])}, |E|={len(graph['edges'])}")
+    if(len(graph['nodes']) == 0):
         return render_template('graph_invalid.html')
-    return render_template('graph_render.html', nodes = nodes, edges = edges)
+    return render_template('graph_render.html', nodes = graph['nodes'], edges = graph['edges'])
 
 @app.server.route('/graph_render_2d', methods = ['GET'])
 def graph_route2():

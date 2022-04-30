@@ -104,3 +104,13 @@ def graph_filter(graph, filter):
     graph['nodes'] = nodes
     graph['edges'] = edges
     return graph
+
+def calculate_graph_degrees(graph):
+
+    for i,v in enumerate(graph['nodes']):
+        degree = 0
+        for e in graph['edges']:
+            if e['source'] == v['id'] or e['target'] == v['id']:
+                degree += 1
+        graph['nodes'][i]['degree'] = degree
+    return graph
