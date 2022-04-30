@@ -80,6 +80,10 @@ app.layout = html.Div([
             html.Div([dcc.RadioItems(['OR', 'AND'], 'OR', id = 'languages-logic-input')], className = 'dcc_control')
         ], className = 'container rightCol'),
         html.Div([
+            html.P("Topics Filter:", className = 'control_label'),
+            html.Div([dcc.Input(id = 'topics-filter-input', value = '', type='text')], className = "dcc_control")
+        ], className = 'container rightCol'),
+        html.Div([
             html.P("Maximum displayed:", className = 'control_label'),
             html.Div([dcc.Input(id = 'limit', value = '10000', type='text')], className = 'dcc_control'),
         ], className='container rightCol'),
@@ -111,8 +115,9 @@ app.layout = html.Div([
     Input('min-watchers-filter-input', 'value'),
     Input('languages-filter-input', 'value'),
     Input('languages-logic-input', 'value'),
+    Input('topics-filter-input', 'value'),
 )
-def update_data(limit, offset, min_watchers_filter_input, languages_filter_input, languages_logic_input):
+def update_data(limit, offset, min_watchers_filter_input, languages_filter_input, languages_logic_input, topics_filter_input):
     #num = 0
     try:
         limit_n= int(limit)
@@ -130,24 +135,29 @@ def update_data(limit, offset, min_watchers_filter_input, languages_filter_input
     except:
         print(f"Cannot cast limit '{min_watchers_filter_input}' to integer")
         return
+    languages = languages_filter_input.split(',')
+    languages = [l.upper() for l in languages]
+    '''
+    def check_row(languages, required_languages):
+        for req in required_languages:
+            if req in languages:
+                return True
+        return False
+    '''
+    while('' in languages):
+        languages.remove('')
+    
+    topics = topics_filter_input.split(',')
+    while('' in topics):
+        topics.remove('')
+    #print("Languages")
+
+    #print(db.construct_where(languages, 100))
+    where = db.construct_where(languages, True if languages_logic_input == 'OR' else False, topics, min_watchers)
+    print(f"WHERE clause: {where}")
+    df = db.db_to_dataframe(limit = limit_n, offset = offset_n, where = where, order_by_col='watchers_count')
+    """
     try:
-        languages = languages_filter_input.split(',')
-        languages = [l.upper() for l in languages]
-        def check_row(languages, required_languages):
-            for req in required_languages:
-                if req in languages:
-                    return True
-            return False
-        while('' in languages):
-            languages.remove('')
-        #print("Languages")
-        #print(db.construct_where(languages, 100))
-    except:
-        print("Failed to construct where clause")
-    try:
-        where = db.construct_where(languages, True if languages_logic_input == 'OR' else False, min_watchers)
-        print(f"WHERE clause: {where}")
-        df = db.db_to_dataframe(limit = limit_n, offset = offset_n, where = where, order_by_col='watchers_count')
     except Exception as e:
         print("Could not make query")
         print(
@@ -157,6 +167,7 @@ def update_data(limit, offset, min_watchers_filter_input, languages_filter_input
         )
         print(e)
         return pd.DataFrame()
+    """
     count = len(df)
     count_str = f'Retrieved {count} results'
     print(df)
