@@ -21,10 +21,10 @@
 .container {
   position: relative;
   width: 100%;
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 0 20px;
-  box-sizing: border-box; }
+  padding: 8px;
+  border-radius: 1.8px;
+  margin: 7.5px;
+}
 .column,
 .columns {
   width: 100%;
