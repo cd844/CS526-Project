@@ -41,7 +41,10 @@
 /* For devices larger than 550px */
 @media (min-width: 550px) {
   .container {
-    width: 80%; }
+    width: 90%;
+    margin: 0 5px;
+    padding: 0 2px;
+    box-sizing: border-box; }
   .column,
   .columns {
     margin-left: 0.5%; }
@@ -118,21 +121,23 @@ body {
   line-height: 1.6;
   font-weight: 400;
   font-family: 'Consolas', 'monospace', "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  /*color: rgb(245, 238, 238);*/
   color: rgb(12, 11, 11);
   background-color: rgb(12, 11, 11);
-  margin: 5%;
+  margin: 3.6%;
 }
 .pretty_container {
-  border-radius: 5px;
+  border-radius: 1.8px;
   background-color: #eeecec;
-  margin: 10px;
-  padding: 15px;
+  margin: 7.5px;
+  width: 100%;
+  /*margin: 0.15%;*/
+  padding: 8px;
   position: relative;
-  box-shadow: 5px 5px 5px rgba(1, 119, 139, 0.473);
+  box-shadow: 5px 5px 5px rgba(3, 94, 110, 0.473);
 }
 
 .custom_tab {
+  width: 100%;
   border-radius: 7px;
   /*background-color: rgb(12, 11, 11);*/
   padding: 0px 25px;
