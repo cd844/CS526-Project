@@ -66,38 +66,36 @@ app.layout = html.Div([
     #    html.Div(dcc.Link('Insights', href='/insights')),
     #], id = 'top-level-tabs'),
     
-    html.Div([
+     html.Div([
         html.Div([
-            html.P("Minimum watchers:", className = 'control_label'),
-            html.Div([dcc.Input(id = 'min-watchers-filter-input', value = '1000', type='text')], className='dcc_control'),
-        ], className = 'container rightCol'),
-        html.Div([
-            html.P("Languages Filter:", className = 'control_label'),
-            html.Div([dcc.Input(id = 'languages-filter-input', value = 'Java', type='text')], className = "dcc_control")
-        ], className = 'container rightCol'),
-        html.Div([
-            html.P("languages search logic", className= 'control_label'),
-            html.Div([dcc.RadioItems(['OR', 'AND'], 'OR', id = 'languages-logic-input')], className = 'dcc_control')
-        ], className = 'container rightCol'),
-        html.Div([
-            html.P("Topics Filter:", className = 'control_label'),
-            html.Div([dcc.Input(id = 'topics-filter-input', value = '', type='text')], className = "dcc_control")
-        ], className = 'container rightCol'),
-        html.Div([
-            html.P("Maximum displayed:", className = 'control_label'),
-            html.Div([dcc.Input(id = 'limit', value = '10000', type='text')], className = 'dcc_control'),
-        ], className='container rightCol'),
-        html.Div([
-            html.P("Offset:", className = 'control_label'),
-            html.Div([dcc.Input(id = 'offset', value = '0', type='text')], className='dcc_control'),
-        ], className = 'container rightCol', style = {'display' : 'block' if debug is True else 'none'}),
-        html.Div([
-           html.P("Set a Focus:", className = 'control_label'),
-            html.Div([dcc.Input(id = 'focus', value = '0', type='text')], className = "dcc_control")
-        ], className = 'container rightCol', style = {'display' : 'block' if debug is True else 'none'})  
-    ], className = 'pretty_container row'),
+            html.Div([
+                html.P("Minimum watchers:", className = 'control_label'),
+                html.Div([dcc.Input(id = 'min-watchers-filter-input', value = '1000', type='text')], className='dcc_control'),
+            ], className = 'container rightCol'),
+            html.Div([
+                html.P("Languages Filter:", className = 'control_label'),
+                html.Div([dcc.Input(id = 'languages-filter-input', value = 'Java', type='text')], className = "dcc_control")
+            ], className = 'container rightCol'),
+            html.Div([
+                html.P("languages search logic", className= 'control_label'),
+                html.Div([dcc.RadioItems(['OR', 'AND'], 'OR', id = 'languages-logic-input')], className = 'dcc_control')
+            ], className = 'container rightCol'),
+            html.Div([
+                html.P("Maximum displayed:", className = 'control_label'),
+                html.Div([dcc.Input(id = 'limit', value = '10000', type='text')], className = 'dcc_control'),
+            ], className='container rightCol'),
+            html.Div([
+                html.P("Offset:", className = 'control_label'),
+                html.Div([dcc.Input(id = 'offset', value = '0', type='text')], className='dcc_control'),
+            ], className = 'container rightCol', style = {'display' : 'block' if debug is True else 'none'}),
+            html.Div([
+            html.P("Set a Focus:", className = 'control_label'),
+                html.Div([dcc.Input(id = 'focus', value = '0', type='text')], className = "dcc_control")
+            ], className = 'container rightCol', style = {'display' : 'block' if debug is True else 'none'})  
+        ], className = 'container row'),
 
-    html.Div(['loading data...'], id = 'data-all-count', className = 'pretty_container'),
+        html.Div(['loading data...'], id = 'data-all-count', className = 'container row'),
+    ], className = 'pretty_container'),
         
     dcc.Store(id='data-all'),
     dcc.Store(id='data-filtered'),
