@@ -1,7 +1,7 @@
 from dash import Dash, html, dcc, Input, Output, callback
 import pandas as pd
 layout = html.Div([
-	html.H5("Top 10 layout", className = "pretty_container"),
+	html.H5("Top 10 Repository Recommendations", className = "pretty_container"),
 	html.Div(id = "list", className = "pretty_container")
 	]
 )
