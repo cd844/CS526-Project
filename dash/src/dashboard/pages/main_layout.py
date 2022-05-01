@@ -40,7 +40,6 @@ Updates displayed repository info
 """
 @callback(
     Output('data-focus-info', 'children'),
-    Output('3d-graph-topics', 'href'),
     #Output('data-focus-lang-figure', 'children'),
     #Input('focus', 'value'),
     Input('data-focus', 'data'),
@@ -81,6 +80,7 @@ def update_focus_info(focus, data_all):
     focus_markup += [f"forks_count: {df.forks_count}", html.Br()]
     focus_markup += ["license: ", html.A(df.license['name'], href = df.license['url']), html.Br()]
 
+
     print(df['languages'])
     langs = []
     l_bytes = []
@@ -92,7 +92,17 @@ def update_focus_info(focus, data_all):
     fig = px.pie(  values = l_bytes, names = langs, hole = 0.3, template = "plotly_dark", width = 300, color_discrete_sequence=px.colors.diverging.Temps)
     #fig = px.pie({'languages': langs, 'bytes': l_bytes,)
 
-    return [html.Div([html.Div(focus_markup), html.Div([dcc.Graph(figure=fig)], className = 'pretty_container')], className = 'row')], f'/graph_render?source=local&topics={";".join(df["topics"])}'
+    topics_button = None
+    if(len(df['topics']) > 0):
+        topics_button = dcc.Link(html.Button('Show 3D Graph (Topics)'), id = '3d-graph-topics', href=f'/graph_render?source=local&topics={";".join(df["topics"])}', target='_blank')
+    return [
+            html.Div([
+                html.Div(focus_markup), 
+                html.Div([dcc.Graph(figure=fig)], className = 'pretty_container')
+                ], className = 'row'),
+                topics_button 
+            ]
+    #className = 'bare_container')
 
 
 scatter_plot_axes = ['forks_count', 'size', 'watchers_count', 'contributors_count']
@@ -131,16 +141,10 @@ layout = html.Div(children=[
         html.Div([
             html.Div([
             ],id = 'data-focus-info',
-            className = 'row',
             ),
             html.Div([
                 dcc.Link(html.Button('Show 3D Graph'), href='/graph_render?source=local', target='_blank',
                 className = 'bare_container'),
-                dcc.Link(html.Button('Show 2D Graph'), href='/graph_render_2d?source=local', target='_blank',
-                className = 'bare_container'),
-                dcc.Link(html.Button('Show 3D Graph (Topics)'), id = '3d-graph-topics', href='', target='_blank',
-                className = 'bare_container'),
-                #html.A('Show 3D Graph', href='/graph_render?source=local', target='_blank')
             ]),
         ], className = 'pretty_container'),
 

@@ -53,7 +53,7 @@ app.layout = html.Div([
             html.H2('GET THE REPO STORY')
         ], className = 'six columns'),
         html.Div([
-            dcc.Tabs(id = "navigation-tabs", value = "about", children = [
+            dcc.Tabs(id = "navigation-tabs", value = "main", children = [
                 dcc.Tab(label = "About Page", value = "about", className = 'custom_tab', style = tab_style, selected_style=tab_select),
                 dcc.Tab(label = "Repository Overview", value = "main", className = 'custom_tab', style = tab_style, selected_style=tab_select),
                 dcc.Tab(label = "Language Comparison", value = "languages", className = 'custom_tab', style = tab_style, selected_style=tab_select),
