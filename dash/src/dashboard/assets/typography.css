@@ -20,7 +20,7 @@
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 .container {
   position: relative;
-  width: 100%;
+  width: 'inherit';
   padding: 8px;
   border-radius: 1.8px;
   margin: 2.5px;
@@ -41,7 +41,7 @@
 /* For devices larger than 550px */
 @media (min-width: 550px) {
   .container {
-    width: 90%;
+    width: 100%;
     margin: 0 5px;
     padding: 0 2px;
     box-sizing: border-box; }
@@ -508,3 +508,4 @@ there.
 
 /* Larger than Desktop HD */
 @media (min-width: 1200px) {}
+
