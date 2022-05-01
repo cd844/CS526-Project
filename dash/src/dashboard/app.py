@@ -74,7 +74,7 @@ app.layout = html.Div([
                 html.Div([dcc.Input(id = 'languages-filter-input', value = 'Java', type='text')], className = "dcc_control")
             ], className = 'container rightCol'),
             html.Div([
-                html.P("Languages search logic", className= 'control_label'),
+                html.P("Languages search logic:", className= 'control_label'),
                 html.Div([dcc.RadioItems(['OR', 'AND'], 'OR', id = 'languages-logic-input')], className = 'dcc_control')
             ], className = 'container rightCol'),
             html.Div([
