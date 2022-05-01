@@ -24,13 +24,13 @@ def update_plots(data_points, xaxis_col, yaxis_col):
         print(data_points)
         return
 
-    scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name', size_max=60,
+    scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name', size_max=60, color_discrete_sequence=px.colors.diverging.Temps,
     hover_data=['name', 'pk',], custom_data = [df.index], template = "plotly_dark", log_x = True)
     #scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
     langs_use = anal.count_language_use(df)
     langs_bytes = anal.count_language_bytes(df)
-    lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group", template = "plotly_dark", width = 725)
-    lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group",template = "plotly_dark", width = 725)
+    lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group", template = "plotly_dark", width = 725, color_discrete_sequence=px.colors.diverging.Temps)
+    lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group",template = "plotly_dark", width = 725, color_discrete_sequence=px.colors.diverging.Temps)
     return lang_count_bar, lang_bytes_bar, scat 
 
 
@@ -89,7 +89,7 @@ def update_focus_info(focus, data_all):
         l_bytes.append(df['languages'][l])
     print(langs)
     print(l_bytes)
-    fig = px.pie(  values = l_bytes, names = langs, hole = 0.3, template = "plotly_dark", width = 300, color_discrete_sequence=px.colors.cyclical.IceFire)
+    fig = px.pie(  values = l_bytes, names = langs, hole = 0.3, template = "plotly_dark", width = 300, color_discrete_sequence=px.colors.diverging.Temps)
     #fig = px.pie({'languages': langs, 'bytes': l_bytes,)
 
     return [html.Div([html.Div(focus_markup), html.Div([dcc.Graph(figure=fig)], className = 'pretty_container')], className = 'row')], f'/graph_render?source=local&topics={";".join(df["topics"])}'
