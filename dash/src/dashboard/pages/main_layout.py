@@ -89,10 +89,10 @@ def update_focus_info(focus, data_all):
         l_bytes.append(df['languages'][l])
     print(langs)
     print(l_bytes)
-    fig = px.pie(  values = l_bytes, names = langs, hole = 0.3)
+    fig = px.pie(  values = l_bytes, names = langs, hole = 0.3, template = "plotly_dark", width = 300, color_discrete_sequence=px.colors.cyclical.IceFire)
     #fig = px.pie({'languages': langs, 'bytes': l_bytes,)
 
-    return [html.Div(focus_markup), html.Div(dcc.Graph(figure=fig))], f'/graph_render?source=local&topics={";".join(df["topics"])}'
+    return [html.Div([html.Div(focus_markup), html.Div([dcc.Graph(figure=fig)], className = 'pretty_container')], className = 'row')], f'/graph_render?source=local&topics={";".join(df["topics"])}'
 
 
 scatter_plot_axes = ['forks_count', 'size', 'watchers_count', 'contributors_count']
