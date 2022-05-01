@@ -81,6 +81,10 @@ app.layout = html.Div([
                 html.Div([dcc.RadioItems(['OR', 'AND'], 'OR', id = 'languages-logic-input')], className = 'dcc_control')
             ], className = 'container rightCol'),
             html.Div([
+                html.P("Topics Filter:", className = 'control_label'),
+                html.Div([dcc.Input(id = 'topics-filter-input', value = '', type='text')], className = "dcc_control")
+            ], className = 'container rightCol'),
+            html.Div([
                 html.P("Maximum displayed:", className = 'control_label'),
                 html.Div([dcc.Input(id = 'limit', value = '10000', type='text')], className = 'dcc_control'),
             ], className='container rightCol'),
