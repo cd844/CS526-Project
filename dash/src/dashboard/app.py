@@ -54,10 +54,10 @@ app.layout = html.Div([
         ], className = 'six columns'),
         html.Div([
             dcc.Tabs(id = "navigation-tabs", value = "main", children = [
-                dcc.Tab(label = "About Page", value = "about", className = 'custom_tab', style = tab_style, selected_style=tab_select),
-                dcc.Tab(label = "Repository Overview", value = "main", className = 'custom_tab', style = tab_style, selected_style=tab_select),
-                dcc.Tab(label = "Language Comparison", value = "languages", className = 'custom_tab', style = tab_style, selected_style=tab_select),
-                dcc.Tab(label = 'Ranked list', value = "list", className = 'custom_tab', style = tab_style, selected_style=tab_select),
+                dcc.Tab(label = "About", value = "about", className = 'custom_tab', style = tab_style, selected_style=tab_select),
+                dcc.Tab(label = "Repo Story", value = "main", className = 'custom_tab', style = tab_style, selected_style=tab_select),
+                dcc.Tab(label = "Languages", value = "languages", className = 'custom_tab', style = tab_style, selected_style=tab_select),
+                dcc.Tab(label = 'Recommendations', value = "list", className = 'custom_tab', style = tab_style, selected_style=tab_select),
                 dcc.Tab(label = 'Insights', value = "insights", className = 'custom_tab', style = tab_style, selected_style=tab_select)
             ], className = 'custom_tab')
         ], className = 'bare_container'),
