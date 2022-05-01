@@ -29,8 +29,8 @@ def update_plots(data_points, xaxis_col, yaxis_col):
     #scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
     langs_use = anal.count_language_use(df)
     langs_bytes = anal.count_language_bytes(df)
-    lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group", template = "plotly_dark")
-    lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group",template = "plotly_dark")
+    lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group", template = "plotly_dark", width = 725)
+    lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group",template = "plotly_dark", width = 725)
     return lang_count_bar, lang_bytes_bar, scat 
 
 
@@ -117,15 +117,16 @@ layout = html.Div(children=[
 
         html.Div(children=[
             html.Div([
-                html.Div(dcc.Graph(id='lang-count-bar')),
-                html.Div(dcc.Graph(id = 'lang-bytes-bar'))
+                html.Div([dcc.Graph(id='lang-count-bar'),
+                    dcc.Graph(id = 'lang-bytes-bar')
+                ], className = 'container row'),
             ], id = 'countGraphContainer', className = "pretty_container"),
 
             html.Div([
                 html.Div(dcc.Graph(id = 'scatter-plot')),
-                html.Div(dcc.Graph(id = 'language-timeseries')),
-            ], id = 'aggregateGraphContainer', className = 'pretty_container eight columns'),
-        ], className = 'row'),
+                #html.Div(dcc.Graph(id = 'language-timeseries')),
+            ], id = 'aggregateGraphContainer', className = 'pretty_container'),
+        ], className = 'rightCol'),
 
         html.Div([
         ],id = 'data-focus-info',
