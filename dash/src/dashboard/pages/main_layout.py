@@ -129,18 +129,20 @@ layout = html.Div(children=[
         ], className = 'rightCol'),
 
         html.Div([
-        ],id = 'data-focus-info',
-        className = 'pretty_container row',
-        ),
-        html.Div([
-            dcc.Link(html.Button('Show 3D Graph'), href='/graph_render?source=local', target='_blank',
-            className = 'bare_container'),
-            dcc.Link(html.Button('Show 2D Graph'), href='/graph_render_2d?source=local', target='_blank',
-            className = 'bare_container'),
-            dcc.Link(html.Button('Show 3D Graph (Topics)'), id = '3d-graph-topics', href='', target='_blank',
-            className = 'bare_container'),
-            #html.A('Show 3D Graph', href='/graph_render?source=local', target='_blank')
-        ]),
+            html.Div([
+            ],id = 'data-focus-info',
+            className = 'pretty_container row',
+            ),
+            html.Div([
+                dcc.Link(html.Button('Show 3D Graph'), href='/graph_render?source=local', target='_blank',
+                className = 'bare_container'),
+                dcc.Link(html.Button('Show 2D Graph'), href='/graph_render_2d?source=local', target='_blank',
+                className = 'bare_container'),
+                dcc.Link(html.Button('Show 3D Graph (Topics)'), id = '3d-graph-topics', href='', target='_blank',
+                className = 'bare_container'),
+                #html.A('Show 3D Graph', href='/graph_render?source=local', target='_blank')
+            ]),
+        ], className = 'pretty_container'),
 
         #style={'font-size': '12px', 'width': '140px', 'display': 'inline-block', 'margin-bottom': '10px', 'margin-right': '5px', 'height':'25px'}
 
