@@ -57,7 +57,7 @@ app.layout = html.Div([
                 dcc.Tab(label = "About", value = "about", className = 'custom_tab', style = tab_style, selected_style=tab_select),
                 dcc.Tab(label = "Repo Story", value = "main", className = 'custom_tab', style = tab_style, selected_style=tab_select),
                 dcc.Tab(label = "Languages", value = "languages", className = 'custom_tab', style = tab_style, selected_style=tab_select),
-                dcc.Tab(label = 'Recommendations', value = "list", className = 'custom_tab', style = tab_style, selected_style=tab_select),
+                dcc.Tab(label = 'Repo Recommends', value = "list", className = 'custom_tab', style = tab_style, selected_style=tab_select),
                 dcc.Tab(label = 'Insights', value = "insights", className = 'custom_tab', style = tab_style, selected_style=tab_select)
             ], className = 'custom_tab')
         ], className = 'bare_container'),
