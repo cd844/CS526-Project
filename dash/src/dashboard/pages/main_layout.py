@@ -131,7 +131,7 @@ layout = html.Div(children=[
         html.Div([
             html.Div([
             ],id = 'data-focus-info',
-            className = 'pretty_container row',
+            className = 'row',
             ),
             html.Div([
                 dcc.Link(html.Button('Show 3D Graph'), href='/graph_render?source=local', target='_blank',
