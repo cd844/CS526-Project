@@ -51,7 +51,7 @@ app.layout = html.Div([
                 className = 'three columns'
             ),
             html.H2('GET THE REPO STORY')
-        ], className = 'five columns'),
+        ], className = 'six columns'),
         html.Div([
             dcc.Tabs(id = "navigation-tabs", value = "main", children = [
                 dcc.Tab(label = "Scatter plot", value = "main", className = 'custom_tab', style = tab_style, selected_style=tab_select),
@@ -59,7 +59,7 @@ app.layout = html.Div([
                 dcc.Tab(label = 'Ranked list', value = "list", className = 'custom_tab', style = tab_style, selected_style=tab_select),
                 dcc.Tab(label = 'Insights', value = "insights", className = 'custom_tab', style = tab_style, selected_style=tab_select)
             ], className = 'custom_tab')
-        ], className = 'container rightCol'),
+        ], className = 'bare_container'),
     ], id = 'header', className = 'row'),
     #html.Div([
     #    html.Div(dcc.Link('Main', href='/')),
