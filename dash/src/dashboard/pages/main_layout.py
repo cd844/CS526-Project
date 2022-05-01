@@ -32,8 +32,8 @@ def update_plots(data_points, xaxis_col, xaxis_type, yaxis_col, yaxis_type):
     #scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
     langs_use = anal.count_language_use(df)
     langs_bytes = anal.count_language_bytes(df)
-    lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group", template = "plotly_dark", width = 725, color_discrete_sequence=px.colors.diverging.Temps)
-    lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group",template = "plotly_dark", width = 725, color_discrete_sequence=px.colors.diverging.Temps)
+    lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group", template = "plotly_dark", color_discrete_sequence=px.colors.diverging.Temps)
+    lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group",template = "plotly_dark", color_discrete_sequence=px.colors.diverging.Temps)
     graph_button = dcc.Link(html.Button('Show 3D Graph'), href='/graph_render?source=local', target='_blank', className = 'bare_container'),
     return lang_count_bar, lang_bytes_bar, scat, graph_button
 
@@ -115,8 +115,12 @@ layout = html.Div(children=[
         html.Div(children=[
             html.Div([
                 html.Div([
-                    dcc.Graph(id='lang-count-bar'),
-                    dcc.Graph(id = 'lang-bytes-bar')
+                    dbc.Col([
+                        dcc.Graph(id='lang-count-bar')
+                    ], style = {'width':'49.65%'}),
+                    dbc.Col([
+                        dcc.Graph(id = 'lang-bytes-bar')
+                    ], style = {'width':'49.65%'})
                 ], className = 'container row'),
             ], id = 'countGraphContainer', className = "pretty_container"),
 
