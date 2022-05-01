@@ -18,7 +18,7 @@ import ast
 
 import graph_gen as gg
 import graph_gen_2d as gg2
-from pages import main_layout, graph_layout, error_404,languages_layout, top10_layout, insights_layout
+from pages import main_layout, graph_layout, error_404,languages_layout, top10_layout, insights_layout, about_layout
 
 from db_connection import db
 pp = pprint.PrettyPrinter(indent = 4)
@@ -53,20 +53,15 @@ app.layout = html.Div([
             html.H2('GET THE REPO STORY')
         ], className = 'six columns'),
         html.Div([
-            dcc.Tabs(id = "navigation-tabs", value = "main", children = [
-                dcc.Tab(label = "Scatter plot", value = "main", className = 'custom_tab', style = tab_style, selected_style=tab_select),
+            dcc.Tabs(id = "navigation-tabs", value = "about", children = [
+                dcc.Tab(label = "About Page", value = "about", className = 'custom_tab', style = tab_style, selected_style=tab_select),
+                dcc.Tab(label = "Repository Overview", value = "main", className = 'custom_tab', style = tab_style, selected_style=tab_select),
                 dcc.Tab(label = "Language Comparison", value = "languages", className = 'custom_tab', style = tab_style, selected_style=tab_select),
                 dcc.Tab(label = 'Ranked list', value = "list", className = 'custom_tab', style = tab_style, selected_style=tab_select),
                 dcc.Tab(label = 'Insights', value = "insights", className = 'custom_tab', style = tab_style, selected_style=tab_select)
             ], className = 'custom_tab')
         ], className = 'bare_container'),
     ], id = 'header', className = 'row'),
-    #html.Div([
-    #    html.Div(dcc.Link('Main', href='/')),
-    #    html.Div(dcc.Link('Languages', href='/languages')),
-    #    html.Div(dcc.Link('Top 10', href='/top10')),
-    #    html.Div(dcc.Link('Insights', href='/insights')),
-    #], id = 'top-level-tabs'),
     
      html.Div([
         html.Div([
@@ -101,7 +96,7 @@ app.layout = html.Div([
         ], className = 'container row'),
 
         html.Div(['loading data...'], id = 'data-all-count', className = 'container row'),
-    ], className = 'pretty_container'),
+    ], id = 'tabs-container', className = 'pretty_container', style = {'display': 'none'}),
         
     dcc.Store(id='data-all'),
     dcc.Store(id='data-filtered'),
@@ -230,18 +225,22 @@ def write_data_to_file(data_all):
     df = pd.read_json(data_all)
     df.to_csv(data_all_file)
     return
-@callback(Output('page-content', 'children'),
+@callback(
+    Output('page-content', 'children'),
+    Output('tabs-container', 'style'),
     [Input('navigation-tabs', 'value')])
 def display_page(nav_tab):
     print(nav_tab)
     if(nav_tab == 'main'):
-        return main_layout.layout
+        return main_layout.layout, {'display': 'block'}
     elif(nav_tab == 'languages'):
-        return languages_layout.layout
+        return languages_layout.layout, {'display': 'block'}
     elif(nav_tab == 'list'):
-        return top10_layout.layout
+        return top10_layout.layout, {'display': 'block'}
     elif(nav_tab == 'insights'):
-        return insights_layout.layout
+        return insights_layout.layout, {'display':'none'}
+    elif(nav_tab == 'about'):
+        return about_layout.layout, {'display': 'none'}
     else:
         return error_404.layout
 
