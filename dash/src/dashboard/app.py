@@ -37,7 +37,9 @@ tab_style = {
 tab_select = {
     'color': '#eeecec',
     'borderTop': '4px solid #008080',
-    'backgroundColor': 'rgb(12, 11, 11)'
+    'borderBottom': '4px solid #008080',
+    'backgroundColor': 'rgb(12, 11, 11)',
+    'fontWeight': 1000
 }
 
 app.layout = html.Div([
