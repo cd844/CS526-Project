@@ -1,3 +1,4 @@
+from re import template
 import dash
 from dash import Dash, html, dcc, Input, Output, callback
 import pandas as pd
@@ -55,7 +56,7 @@ def update_language_time_series(data_all, languages):
         #print(bins[b])
         time_points = pd.concat([time_points, bins[b]])
     #print(time_points)
-    return px.line(time_points, x=time_label, y = count_label, color = 'language')
+    return px.line(time_points, x=time_label, y = count_label, color = 'language', template = 'plotly_dark', color_discrete_sequence=px.colors.diverging.Temps)
 
 """
 Updates language comparisons
@@ -106,20 +107,23 @@ def update_language_violin(languages, data_all, time_range_start, time_range_end
         violin_points['created_ts'] = violin_points['created_ts'].apply(lambda x : pd.to_datetime(x).tz_localize(None))
         violin_points = violin_points[ violin_points['created_ts'].apply(lambda time : time > time_range_start and time < time_range_end) ]
     print(len(violin_points['created_ts']))
-    return px.violin(violin_points, y = violin_y_label, color = lang_label, box=True, hover_data = ['df_index', 'full_name', 'created_ts'], points='all')
+    return px.violin(violin_points, y = violin_y_label, color = lang_label, box=True, template = 'plotly_dark', color_discrete_sequence=px.colors.diverging.Temps,
+                    hover_data = ['df_index', 'full_name', 'created_ts'], points='all')
 
 languages_dropdown = ['Java', 'Python', 'C', 'C++', 'JavaScript', 'PHP', 'Go', "TypeScript", 'CSS', 'React', 'Kotlin', 'Rust']
 layout = html.Div(
         html.Div([
-            html.Div(
+            html.Div([
                 dcc.Dropdown(
                     languages_dropdown, languages_dropdown[0:3], multi=True,
                     id = 'language-comparison-dropdown',
                     className = 'dcc_control'
                 )
-            ),
-            html.Div(dcc.Graph(id='language-comparison-violin')),
-            html.Div(dcc.Graph(id='language-comparison-timeseries')),
+            ], className = 'pretty_container'),
+            html.Div([
+                html.Div(dcc.Graph(id='language-comparison-violin')),
+                html.Div(dcc.Graph(id='language-comparison-timeseries')),
+            ], className = 'pretty_container'),
             dcc.Store(id = 'time-range-start'),
             dcc.Store(id = 'time-range-end'),
         ]),
