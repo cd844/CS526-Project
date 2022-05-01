@@ -36,7 +36,7 @@ tab_style = {
 
 tab_select = {
     'color': '#eeecec',
-    'borderTop': '4px solid #7F00FF',
+    'borderTop': '4px solid #008080',
     'backgroundColor': 'rgb(12, 11, 11)'
 }
 
