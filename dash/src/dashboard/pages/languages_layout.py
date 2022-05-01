@@ -110,12 +110,29 @@ def update_language_violin(languages, data_all, time_range_start, time_range_end
     return px.violin(violin_points, y = violin_y_label, color = lang_label, box=True, template = 'plotly_dark', color_discrete_sequence=px.colors.diverging.Temps,
                     hover_data = ['df_index', 'full_name', 'created_ts'], points='all')
 
-languages_dropdown = ['Java', 'Python', 'C', 'C++', 'JavaScript', 'PHP', 'Go', "TypeScript", 'CSS', 'React', 'Kotlin', 'Rust']
+
+@callback(
+    Output('language-comparison-dropdown', 'options'),
+    Input('data-all', 'data')
+)
+def update_languages(data_all):
+    print("update_languages_options")
+    df = pd.read_json(data_all)
+    languages_dropdown = []
+    for langs in df['languages']:
+        for l in langs:
+            if l not in languages_dropdown:
+                languages_dropdown.append(l) #O(n^2) lmao
+    # tabulate languages
+
+    return languages_dropdown
+
+
 layout = html.Div(
         html.Div([
             html.Div([
                 dcc.Dropdown(
-                    languages_dropdown, languages_dropdown[0:3], multi=True,
+                    [], [], multi=True,
                     id = 'language-comparison-dropdown',
                     className = 'dcc_control'
                 )
