@@ -11,11 +11,14 @@ import pprint
     Output('lang-count-bar', 'figure'),
     Output('lang-bytes-bar', 'figure'),
     Output('scatter-plot', 'figure'),
+    Output('3d-graph-button-container', 'children'),
     Input('data-all', 'data'),
     Input('xaxis-col', 'value'),
+    Input('xaxis-type', 'value'),
     Input('yaxis-col', 'value'),
+    Input('yaxis-type', 'value'),
 )
-def update_plots(data_points, xaxis_col, yaxis_col):
+def update_plots(data_points, xaxis_col, xaxis_type, yaxis_col, yaxis_type):
     print("updating plots")
     try:
         df = pd.read_json(data_points)
@@ -25,13 +28,14 @@ def update_plots(data_points, xaxis_col, yaxis_col):
         return
 
     scat = px.scatter(df, x=xaxis_col, y = yaxis_col, hover_name='name', size_max=60, color_discrete_sequence=px.colors.diverging.Temps,
-    hover_data=['name', 'pk',], custom_data = [df.index], template = "plotly_dark", log_x = True)
+    hover_data=['name', 'pk',], custom_data = [df.index], template = "plotly_dark", log_x = xaxis_type == "Log", log_y = yaxis_type == "Log")
     #scat.update_traces(hovertemplate='<b>%{customdata[0]}</b>')
     langs_use = anal.count_language_use(df)
     langs_bytes = anal.count_language_bytes(df)
     lang_count_bar = px.bar(langs_use, x="language", y="count", barmode="group", template = "plotly_dark", width = 725, color_discrete_sequence=px.colors.diverging.Temps)
     lang_bytes_bar = px.bar(langs_bytes, x="language", y="bytes", barmode="group",template = "plotly_dark", width = 725, color_discrete_sequence=px.colors.diverging.Temps)
-    return lang_count_bar, lang_bytes_bar, scat 
+    graph_button = dcc.Link(html.Button('Show 3D Graph'), href='/graph_render?source=local', target='_blank', className = 'bare_container'),
+    return lang_count_bar, lang_bytes_bar, scat, graph_button
 
 
 
@@ -105,36 +109,50 @@ def update_focus_info(focus, data_all):
     #className = 'bare_container')
 
 
-scatter_plot_axes = ['forks_count', 'size', 'watchers_count', 'contributors_count']
+scatter_plot_axes = ['forks_count', 'watchers_count', 'contributors_count', 'size']
 layout = html.Div(children=[
-
-        html.Div([
-            html.Div([
-                dcc.Dropdown(
-                    scatter_plot_axes, scatter_plot_axes[0],
-                    id = 'xaxis-col',
-                    className = 'dcc_control'
-                )
-            ]),
-            html.Div([
-                dcc.Dropdown(
-                    scatter_plot_axes, scatter_plot_axes[1],
-                    id = 'yaxis-col',
-                    className = 'dcc_control'
-                )
-            ])
-        ], className = 'pretty_container'),
 
         html.Div(children=[
             html.Div([
-                html.Div([dcc.Graph(id='lang-count-bar'),
+                html.Div([
+                    dcc.Graph(id='lang-count-bar'),
                     dcc.Graph(id = 'lang-bytes-bar')
                 ], className = 'container row'),
             ], id = 'countGraphContainer', className = "pretty_container"),
 
             html.Div([
+                html.Div([
+                    html.Div([
+                        dcc.Dropdown(
+                            scatter_plot_axes, scatter_plot_axes[0],
+                            id = 'xaxis-col',
+                            className = 'dcc_control'
+                        ),
+                        dcc.RadioItems(
+                            ['Linear', 'Log'],
+                            'Linear',
+                            id='xaxis-type',
+                            labelStyle={'display': 'inline-block', 'marginTop': '5px'}
+                        )
+                    ]),
+                    html.Div([
+                        dcc.Dropdown(
+                            scatter_plot_axes, scatter_plot_axes[1],
+                            id = 'yaxis-col',
+                            className = 'dcc_control'
+                        ),
+                        dcc.RadioItems(
+                            ['Linear', 'Log'],
+                            'Linear',
+                            id='yaxis-type',
+                            labelStyle={'display': 'inline-block', 'marginTop': '5px'}
+                        )
+                    ])
+                ], id = 'scatter-axes-controls'),
+
                 html.Div(dcc.Graph(id = 'scatter-plot')),
                 #html.Div(dcc.Graph(id = 'language-timeseries')),
+                html.Div([], id = '3d-graph-button-container', style = {'marginTop': '5px'})
             ], id = 'aggregateGraphContainer', className = 'pretty_container'),
         ], className = 'rightCol'),
 
@@ -142,13 +160,8 @@ layout = html.Div(children=[
             html.Div([
             ],id = 'data-focus-info',
             ),
-            html.Div([
-                dcc.Link(html.Button('Show 3D Graph'), href='/graph_render?source=local', target='_blank',
-                className = 'bare_container'),
-            ]),
         ], className = 'pretty_container'),
 
-        #style={'font-size': '12px', 'width': '140px', 'display': 'inline-block', 'margin-bottom': '10px', 'margin-right': '5px', 'height':'25px'}
 
         html.Div(id='violin-plot') # Hack to stop callback errors
 
