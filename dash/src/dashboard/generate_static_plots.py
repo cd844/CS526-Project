@@ -39,13 +39,13 @@ def lang_vs_count(df):
             lst.append([key,value])
     df2=pd.DataFrame(lst,columns=['languages','count'])
     
-    barfig = px.bar(df2, x="languages", y="count",color="count",
+    barfig = px.bar(df2, x="languages", y="count",color="count", template = 'plotly_dark', color_discrete_sequence=px.colors.diverging.Temps,
 
                   title='language vs count')
     # fig.update_xaxes(
     #     rangeslider_visible=True)
 
-    piefig = px.pie(df2, values='count', names='languages', color = 'count')
+    piefig = px.pie(df2, values='count', names='languages', color = 'count', template = 'plotly_dark', color_discrete_sequence=px.colors.diverging.Temps)
     #fig.write_html('pie.html', output_type = 'div')
     return barfig, piefig
 
@@ -64,9 +64,9 @@ def lang_vs_watcher(df):
     df_count = pd.DataFrame(new_list,columns=['name', 'languages', 'topics', 'created_ts', 'watchers_count'])
    
 
-    fig = px.scatter(df_count, x="languages", y="watchers_count",color="watchers_count",hover_name = 'name',
+    fig = px.scatter(df_count, x="languages", y="watchers_count",color="watchers_count",hover_name = 'name', template = 'plotly_dark',
 
-                  title='Languages that are dominant in the repositories with their watchers count')
+                  title='Languages that are dominant in the repositories with their watchers count', color_discrete_sequence=px.colors.diverging.Temps)
     # fig.update_xaxes(
     #     rangeslider_visible=True)
 
@@ -91,7 +91,7 @@ def lang_vs_fork(df):
 
     fig = px.scatter(df_topics_new, x="languages", y="fork_count",color="fork_count",hover_name = 'languages',
 
-                  title='Languages vs their forks count')
+                  template = 'plotly_dark', title='Languages vs their forks count', color_discrete_sequence=px.colors.diverging.Temps)
     # fig.update_xaxes(
     #     rangeslider_visible=True)
 
@@ -121,7 +121,7 @@ def topics_vs_count(df):
 
     fig = px.bar(topic_dic_count_df, x="topics", y="count",color="topics",hover_name = 'topics',
 
-                  title='topics vs their count')
+                  color_discrete_sequence=px.colors.diverging.Temps, template = 'plotly_dark', title='topics vs their count')
     # fig.update_xaxes(
     #     rangeslider_visible=True)
 
