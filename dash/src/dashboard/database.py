@@ -7,6 +7,7 @@ class DatabaseInterface:
     connection_def = None
     connection_type = 'sqlite3'
     debug = False
+    table_name = 'repos_filtered'
     def __init__(self, con, con_type = 'sqlite'):
         if(con_type not in ['sqlite']):
             raise Exception('bad db type')
@@ -33,7 +34,7 @@ class DatabaseInterface:
         con = sqlite3.connect(self.connection_def)
         cur = con.cursor()
 
-        query_s = "SELECT * FROM repos"
+        query_s = f"SELECT * FROM {self.table_name}"
         if where != None:
             query_s += f" WHERE {where}"
         if order_by_col != None:
