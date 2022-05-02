@@ -21,6 +21,7 @@
 
     <script>
       node_size_scale = 10
+      node_color_scale = Math.pow(2,24)/144;
       const gData = {
           nodes:dict["nodes"],
           links:dict["links"],
@@ -42,7 +43,7 @@
           .nodeThreeObject( (node) => new THREE.Mesh(
             new THREE.SphereGeometry( sizeFun(node) ),
             new THREE.MeshLambertMaterial({
-              color: Math.round(Math.random() * Math.pow(2, 24)), //TODO: Color based on something idk
+              color: node.degree * node_color_scale, //TODO: Color based on something idk
               transparent: true,
               opacity: 0.75
             })
