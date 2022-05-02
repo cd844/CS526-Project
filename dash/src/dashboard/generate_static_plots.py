@@ -8,7 +8,7 @@ def create_df():
     
     con = sqlite3.connect('./data/new_repos.db')
     cur = con.cursor()
-    rows = cur.execute('SELECT * FROM repos where topics is not Null limit 10000')
+    rows = cur.execute('SELECT * FROM repos LIMIT 100000')
 
     attributes = [description[0] for description in cur.description]
     data = dict()
@@ -41,7 +41,7 @@ def lang_vs_count(df):
     
     barfig = px.bar(df2, x="languages", y="count",color="count",
 
-                  title='custom tick labels')
+                  title='language vs count')
     # fig.update_xaxes(
     #     rangeslider_visible=True)
 
@@ -116,9 +116,8 @@ def topics_vs_count(df):
         if val> 10:
             topic_dic_list.append([key,val])
             
+    topic_dic_list.sort(key = lambda x : -x[1])
     topic_dic_count_df=pd.DataFrame(topic_dic_list,columns=['topics','count'])
-
-
 
     fig = px.bar(topic_dic_count_df, x="topics", y="count",color="topics",hover_name = 'topics',
 

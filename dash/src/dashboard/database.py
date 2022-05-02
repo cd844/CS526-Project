@@ -65,6 +65,7 @@ class DatabaseInterface:
         df['topics'] = df['topics'].apply(lambda x : json.loads(x))
         df['contributors_count'] = df['contributors_count'].apply(lambda x : 1 if np.isnan(x) else x)
         #df['contributors'] = df['contributors'].apply(lambda x : json.loads(x)[0])
+        df = df.drop_duplicates(subset = ['full_name'])
         return df
 
 

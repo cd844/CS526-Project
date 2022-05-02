@@ -71,7 +71,7 @@ app.layout = html.Div([
             ], className = 'container rightCol'),
             html.Div([
                 html.P("Languages Filter:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'languages-filter-input', value = 'Java', type='text')], className = "dcc_control")
+                html.Div([dcc.Input(id = 'languages-filter-input', value = 'Java', type='text', debounce = True)], className = "dcc_control")
             ], className = 'container rightCol'),
             html.Div([
                 html.P("Languages search logic:", className= 'control_label'),
@@ -79,7 +79,7 @@ app.layout = html.Div([
             ], className = 'container rightCol'),
             html.Div([
                 html.P("Topics Filter:", className = 'control_label'),
-                html.Div([dcc.Input(id = 'topics-filter-input', value = '', type='text')], className = "dcc_control")
+                html.Div([dcc.Input(id = 'topics-filter-input', value = '', type='text', debounce = True)], className = "dcc_control")
             ], className = 'container rightCol'),
             html.Div([
                 html.P("Maximum displayed:", className = 'control_label'),
