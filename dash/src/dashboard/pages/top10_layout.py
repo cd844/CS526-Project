@@ -18,8 +18,8 @@ def update_list(data_all):
     list_contents = [None for i in range(0,n)]
     for i in range(0, n):
         repo = df.iloc[i]
-        markup_i = [ html.A(html.H5(repo['name']), href=repo['html_url'])]
-        markup_i += [html.A(repo.owner["login"], href = repo.owner['html_url']), html.Br()]
+        markup_i = [ html.A(html.H5(repo['name']), href=repo['html_url'], target = "_blank")]
+        markup_i += [html.A(repo.owner["login"], href = repo.owner['html_url'], target = "_blank"), html.Br()]
         markup_i += [repo.description, html.Br()]
         markup_i += [f"watchers_count: {repo.watchers_count}", html.Br()]
         list_contents[i] = html.Div(markup_i)
