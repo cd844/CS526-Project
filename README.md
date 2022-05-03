@@ -12,5 +12,5 @@ mkdir ./dash/data
 ```
 cd dash
 pip install -r requirements.txt
-python src/app.py
+python src/dashboard/app.py
 ```
